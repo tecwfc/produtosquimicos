@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Pedidos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { inter: ['Inter', 'sans-serif'] },
+          colors: {
+            primary: '#16a34a',   // Verde escuro
+            secondary: '#4ade80', // Verde claro
+            background: '#ecfdf5', // Fundo verde suave
+            card: '#ffffff',       // Branco para contraste
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #dcfce7, #f0fdf4); /* tons de verde suave */
+    }
+    .fade-in {
+      animation: fadeIn 0.4s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="p-6 min-h-screen flex items-center justify-center">
+
+  <div class="container-wrapper w-full max-w-4xl bg-card rounded-2xl shadow-xl p-8">
+    <h1 class="text-2xl font-bold text-center mb-8 text-gray-900">📦 Pedido Produto Químico</h1>
+
+    <!-- Formulário -->
+    <div class="mb-10 p-6 bg-gradient-to-r from-green-50 to-green-100 rounded-2xl shadow-md border border-green-200">
+      <form id="orderForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label for="orderDate" class="block text-sm font-semibold text-gray-700 mb-2">📅 Data</label>
+          <input type="date" id="orderDate" required
+            class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition">
+        </div>
+        <div>
+          <label for="productDescription" class="block text-sm font-semibold text-gray-700 mb-2">🧪 Descrição</label>
+          <select id="productDescription" required
+            class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition bg-white">
+            <option value="">Carregando produtos...</option>
+          </select>
+        </div>
+        <div>
+          <label for="productType" class="block text-sm font-semibold text-gray-700 mb-2">⚖️ Tipo</label>
+          <input type="text" id="productType" readonly
+            class="block w-full px-4 py-2 border border-gray-200 bg-gray-100 rounded-lg shadow-sm cursor-not-allowed">
+        </div>
+        <div>
+          <label for="orderQuantity" class="block text-sm font-semibold text-gray-700 mb-2">📦 Quantidade</label>
+          <input type="number" id="orderQuantity" min="0.01" step="0.01" required
+            class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition">
+        </div>
+        <div class="md:col-span-2 flex justify-end">
+          <button type="submit"
+            class="flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-xl shadow-md bg-primary hover:bg-green-700 focus:ring-2 focus:ring-primary transition">
+            ➕ Adicionar Pedido
+          </button>
+        </div>
+      </form>
+      <div id="messageBox" class="mt-4 p-3 rounded-lg text-sm hidden fade-in" role="alert"></div>
+    </div>
+
+    <!-- Pedidos -->
+    <div class="p-6 bg-card rounded-2xl shadow-md border border-green-200">
+      <h2 class="text-2xl font-bold mb-6 text-gray-800">📋 Pedidos Registrados</h2>
+      <div id="ordersList" class="space-y-4">
+        <p id="noOrdersMessage" class="text-gray-500 text-center">Nenhum pedido registrado ainda.</p>
+      </div>
+      <div class="flex justify-center mt-6">
+        <button id="clearOrdersBtn"
+          class="px-6 py-3 text-red-700 font-semibold rounded-xl shadow-sm bg-red-100 hover:bg-red-200 focus:ring-2 focus:ring-red-500 transition">
+          🗑️ Limpar Todos os Pedidos
+        </button>
+      </div>
+    </div>
+
+    <!-- Gerar PDF -->
+    <div class="flex justify-center mt-8">
+      <button id="generatePDF"
+        class="flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-xl shadow-md bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 transition">
+        📄 Gerar Pedido PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Estrutura PDF -->
+  <div id="pdfContent" class="hidden p-6 bg-card max-w-3xl mx-auto">
+    <h1 class="text-2xl font-bold mb-2 text-center text-primary">Pedido GLGA - Ivo Pita Indústria</h1>
+    <p id="reportDate" class="text-center text-gray-600 mb-4"></p>
+    <table class="w-full text-sm border border-gray-300 rounded-lg overflow-hidden">
+      <thead class="bg-primary text-white">
+        <tr>
+          <th class="p-2 border border-gray-300">Data</th>
+          <th class="p-2 border border-gray-300">Descrição</th>
+          <th class="p-2 border border-gray-300">Tipo</th>
+          <th class="p-2 border border-gray-300">Quantidade</th>
+        </tr>
+      </thead>
+      <tbody id="pdfTableBody" class="text-center"></tbody>
+    </table>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+
+  <script>
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHzCiHTdfZMbQXOZzoDrWKxkzutGcaZ1j-gFEaeqmw1pm8geKI50zzYRdwwhASswsjWQ/exec';
+    let productData = [];
+
+    const orderForm = document.getElementById('orderForm');
+    const productDescriptionSelect = document.getElementById('productDescription');
+    const productTypeInput = document.getElementById('productType');
+    const ordersListDiv = document.getElementById('ordersList');
+    const noOrdersMessage = document.getElementById('noOrdersMessage');
+    const messageBox = document.getElementById('messageBox');
+    const clearOrdersBtn = document.getElementById('clearOrdersBtn');
+
+    function showMessage(message, type = 'success') {
+      messageBox.textContent = message;
+      messageBox.className = 'mt-4 p-3 rounded-md text-sm';
+      if (type === 'success') messageBox.classList.add('bg-green-100', 'text-green-800');
+      else if (type === 'error') messageBox.classList.add('bg-red-100', 'text-red-800');
+      else if (type === 'warning') messageBox.classList.add('bg-yellow-100', 'text-yellow-800');
+      messageBox.classList.remove('hidden');
+      setTimeout(() => messageBox.classList.add('hidden'), 3000);
+    }
+
+    async function fetchProductData() {
+      productDescriptionSelect.innerHTML = '<option value="">Carregando produtos...</option>';
+      productDescriptionSelect.disabled = true;
+      try {
+        const url = `${GOOGLE_SCRIPT_URL}?action=getProducts&t=${Date.now()}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.status === 'success' && data.products) {
+          productData = data.products;
+          populateProductDescriptions();
+        } else throw new Error(data.message || 'Erro ao processar resposta');
+      } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        productDescriptionSelect.innerHTML = '<option value="">Erro ao carregar produtos</option>';
+      } finally {
+        productDescriptionSelect.disabled = false;
+      }
+    }
+
+    function populateProductDescriptions() {
+      productDescriptionSelect.innerHTML = '<option value="">Selecione um produto</option>';
+      productData.forEach(product => {
+        const option = document.createElement('option');
+        option.value = product.description;
+        option.textContent = product.description;
+        option.dataset.type = product.type;
+        productDescriptionSelect.appendChild(option);
+      });
+    }
+
+    function autoFillProductType() {
+      const selectedOption = productDescriptionSelect.selectedOptions[0];
+      productTypeInput.value = selectedOption ? selectedOption.dataset.type : '';
+    }
+
+    function loadOrders() {
+      const orders = JSON.parse(localStorage.getItem('orders')) || [];
+      ordersListDiv.innerHTML = '';
+      if (orders.length === 0) noOrdersMessage.classList.remove('hidden');
+      else {
+        noOrdersMessage.classList.add('hidden');
+        orders.forEach((order, index) => {
+          const orderCard = document.createElement('div');
+          orderCard.className = 'bg-green-50 p-4 rounded-lg shadow-sm border border-green-200 flex flex-col md:flex-row justify-between items-start md:items-center';
+          orderCard.innerHTML = `
+            <div class="flex-grow">
+              <p class="text-sm text-gray-500">Data: <span class="font-medium text-gray-700">${order.date.split('-').reverse().join('/')}</span></p>
+              <p class="text-lg font-semibold text-gray-800">${order.description}</p>
+              <p class="text-md text-gray-600">Quantidade: <span class="font-medium">${order.quantity} ${order.type}</span></p>
+            </div>
+            <button data-index="${index}" class="delete-btn mt-3 md:mt-0 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition ease-in-out duration-150">
+              Excluir
+            </button>
+          `;
+          ordersListDiv.appendChild(orderCard);
+        });
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', e => deleteOrder(parseInt(e.target.dataset.index)));
+        });
+      }
+    }
+
+    async function saveOrder(order) {
+      const orders = JSON.parse(localStorage.getItem('orders')) || [];
+      orders.push(order);
+      localStorage.setItem('orders', JSON.stringify(orders));
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'saveOrder', orderData: order })
+        });
+      } catch (error) {
+        console.error('Erro ao enviar para Google Sheets:', error);
+      }
+      loadOrders();
+    }
+
+    function deleteOrder(index) {
+      const orders = JSON.parse(localStorage.getItem('orders')) || [];
+      if (index >= 0 && index < orders.length) {
+        orders.splice(index, 1);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        loadOrders();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+      fetchProductData();
+      loadOrders();
+    });
+
+    productDescriptionSelect.addEventListener('change', autoFillProductType);
+
+    orderForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const orderDate = document.getElementById('orderDate').value;
+      const productDescription = productDescriptionSelect.value;
+      const productType = productTypeInput.value;
+      const orderQuantity = parseFloat(document.getElementById('orderQuantity').value);
+      if (!orderDate || !productDescription || !productType || isNaN(orderQuantity) || orderQuantity <= 0) {
+        showMessage('Por favor, preencha todos os campos corretamente.', 'error');
+        return;
+      }
+      const newOrder = { date: orderDate, description: productDescription, type: productType, quantity: orderQuantity };
+      saveOrder(newOrder);
+      orderForm.reset();
+      document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+      productTypeInput.value = '';
+    });
+
+    clearOrdersBtn.addEventListener('click', () => {
+      if (confirm('Tem certeza que deseja limpar todos os pedidos?')) {
+        localStorage.removeItem('orders');
+        loadOrders();
+      }
+    });
+
+    // Gerar PDF
+    document.getElementById('generatePDF').addEventListener('click', () => {
+      const orders = JSON.parse(localStorage.getItem('orders')) || [];
+      const tableBody = document.getElementById('pdfTableBody');
+      tableBody.innerHTML = '';
+
+      if (orders.length === 0) {
+        alert('Nenhum pedido registrado para gerar o relatório.');
+        return;
+      }
+
+      orders.forEach(order => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="border border-gray-300 p-2">${order.date.split('-').reverse().join('/')}</td>
+          <td class="border border-gray-300 p-2">${order.description}</td>
+          <td class="border border-gray-300 p-2">${order.type}</td>
+          <td class="border border-gray-300 p-2">${order.quantity}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      const hoje = new Date();
+      const dia = String(hoje.getDate()).padStart(2, '0');
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+      const ano = hoje.getFullYear();
+      const hora = String(hoje.getHours()).padStart(2, '0');
+      const minuto = String(hoje.getMinutes()).padStart(2, '0');
+
+      const dataFormatada = `${dia}-${mes}-${ano}_${hora}-${minuto}`;
+      const dataFormatadaBR = `${dia}/${mes}/${ano} ${hora}:${minuto}`;
+      document.getElementById('reportDate').textContent = `Data do Relatório: ${dataFormatadaBR}`;
+
+      const pdfOptions = {
+        margin: 0.5,
+        filename: `Pedidos_Ivo Pita_${dataFormatada}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+
+      const element = document.getElementById('pdfContent');
+      element.classList.remove('hidden');
+      html2pdf().set(pdfOptions).from(element).save().then(() => {
+        element.classList.add('hidden');
+      });
+    });
+
+  </script>
+</body>
+</html>
