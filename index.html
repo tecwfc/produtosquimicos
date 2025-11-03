@@ -54,15 +54,16 @@
             <option value="">Carregando produtos...</option>
           </select>
         </div>
-        <div>
-          <label for="productType" class="block text-sm font-semibold text-gray-700 mb-2">⚖️ Tipo</label>
-          <input type="text" id="productType" readonly
-            class="block w-full px-4 py-2 border border-gray-200 bg-gray-100 rounded-lg shadow-sm cursor-not-allowed">
-        </div>
+        <!-- Alteração: Quantidade antes do Tipo -->
         <div>
           <label for="orderQuantity" class="block text-sm font-semibold text-gray-700 mb-2">📦 Quantidade</label>
           <input type="number" id="orderQuantity" min="0.01" step="0.01" required
             class="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition">
+        </div>
+        <div>
+          <label for="productType" class="block text-sm font-semibold text-gray-700 mb-2">⚖️ Tipo</label>
+          <input type="text" id="productType" readonly
+            class="block w-full px-4 py-2 border border-gray-200 bg-gray-100 rounded-lg shadow-sm cursor-not-allowed">
         </div>
         <div class="md:col-span-2 flex justify-end">
           <button type="submit"
@@ -106,8 +107,8 @@
         <tr>
           <th class="p-2 border border-gray-300">Data</th>
           <th class="p-2 border border-gray-300">Descrição</th>
-          <th class="p-2 border border-gray-300">Tipo</th>
           <th class="p-2 border border-gray-300">Quantidade</th>
+          <th class="p-2 border border-gray-300">Tipo</th>
         </tr>
       </thead>
       <tbody id="pdfTableBody" class="text-center"></tbody>
@@ -187,7 +188,8 @@
             <div class="flex-grow">
               <p class="text-sm text-gray-500">Data: <span class="font-medium text-gray-700">${order.date.split('-').reverse().join('/')}</span></p>
               <p class="text-lg font-semibold text-gray-800">${order.description}</p>
-              <p class="text-md text-gray-600">Quantidade: <span class="font-medium">${order.quantity} ${order.type}</span></p>
+              <p class="text-md text-gray-600">Quantidade: <span class="font-medium">${order.quantity}</span></p>
+              <p class="text-md text-gray-600">Tipo: <span class="font-medium">${order.type}</span></p>
             </div>
             <button data-index="${index}" class="delete-btn mt-3 md:mt-0 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition ease-in-out duration-150">
               Excluir
@@ -244,7 +246,7 @@
         showMessage('Por favor, preencha todos os campos corretamente.', 'error');
         return;
       }
-      const newOrder = { date: orderDate, description: productDescription, type: productType, quantity: orderQuantity };
+      const newOrder = { date: orderDate, description: productDescription, quantity: orderQuantity, type: productType };
       saveOrder(newOrder);
       orderForm.reset();
       document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
@@ -274,8 +276,8 @@
         row.innerHTML = `
           <td class="border border-gray-300 p-2">${order.date.split('-').reverse().join('/')}</td>
           <td class="border border-gray-300 p-2">${order.description}</td>
-          <td class="border border-gray-300 p-2">${order.type}</td>
           <td class="border border-gray-300 p-2">${order.quantity}</td>
+          <td class="border border-gray-300 p-2">${order.type}</td>
         `;
         tableBody.appendChild(row);
       });
