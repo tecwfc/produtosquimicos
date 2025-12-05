@@ -79,6 +79,11 @@
 
     /* subtle focus ring override */
     .focus-ring:focus { outline: none; box-shadow: 0 0 0 4px rgba(16,185,129,0.12); border-color: var(--tw-ring-color); }
+
+    /* product list small tweaks */
+    .product-row { transition: background .12s; }
+    .product-row:hover { background: rgba(16,185,129,0.03); }
+    .qty-input { max-width: 120px; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -139,25 +144,39 @@
               <label class="text-sm text-gray-600">📅 Data</label>
               <input id="orderDate" type="date" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus-ring bg-white/70" required />
 
-              <label class="text-sm text-gray-600">🧪 Produto</label>
-              <select id="productDescription" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/70 focus-ring" required>
+              <label class="text-sm text-gray-600">🧪 Produto (selecione abaixo e informe quantidades)</label>
+
+              <!-- mantém o select (compatibilidade) mas também mostramos a lista com checkboxes -->
+              <select id="productDescription" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/70 focus-ring hidden" required>
                 <option value="">Carregando...</option>
               </select>
 
+              <!-- NOVO: lista de produtos com checkbox + campo quantidade -->
+              <div id="productList" class="max-h-56 overflow-auto border border-gray-100 rounded-lg p-2 bg-white/60"></div>
+
+              <div class="flex items-center gap-2">
+                <button id="addSelectedBtn" type="button" class="flex-1 px-4 py-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white font-semibold shadow hover:scale-[1.01] transition">
+                  ➕ Adicionar selecionados
+                </button>
+                <button id="clearSelections" type="button" class="px-4 py-3 rounded-xl border border-gray-200 text-gray-700 bg-white/60">Limpar seleção</button>
+              </div>
+
+              <div id="singleAddDivider" class="text-center text-xs text-gray-400">ou adicionar 1 produto manualmente</div>
+
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="text-sm text-gray-600">📦 Quantidade</label>
-                  <input id="orderQuantity" type="number" min="0.01" step="0.01" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/70 focus-ring" required />
+                  <label class="text-sm text-gray-600">Produto (manual)</label>
+                  <input id="manualProduct" type="text" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/70 focus-ring" placeholder="Descrição alternativa" />
                 </div>
                 <div>
-                  <label class="text-sm text-gray-600">⚖️ Tipo</label>
-                  <input id="productType" readonly class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 focus-ring cursor-not-allowed" />
+                  <label class="text-sm text-gray-600">Quantidade (manual)</label>
+                  <input id="manualQuantity" type="number" min="0.01" step="0.01" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/70 focus-ring" />
                 </div>
               </div>
 
               <div class="flex gap-3 mt-2">
-                <button type="submit" class="flex-1 px-4 py-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white font-semibold shadow hover:scale-[1.01] transition">
-                  ➕ Adicionar
+                <button id="singleAddBtn" type="button" class="flex-1 px-4 py-3 rounded-xl bg-white text-green-700 border border-green-600 font-semibold hover:bg-green-50 transition">
+                  ➕ Adicionar manual
                 </button>
                 <button id="clearForm" type="button" class="px-4 py-3 rounded-xl border border-gray-200 text-gray-700 bg-white/60">Limpar</button>
               </div>
@@ -270,6 +289,14 @@
     const reportDate = document.getElementById('reportDate');
     const countInfo = document.getElementById('countInfo');
 
+    // new elements
+    const productListEl = document.getElementById('productList');
+    const addSelectedBtn = document.getElementById('addSelectedBtn');
+    const clearSelectionsBtn = document.getElementById('clearSelections');
+    const singleAddBtn = document.getElementById('singleAddBtn');
+    const manualProductInput = document.getElementById('manualProduct');
+    const manualQuantityInput = document.getElementById('manualQuantity');
+
     let products = [];
     let orders = [];
 
@@ -323,12 +350,14 @@
         if (data?.status === 'success' && Array.isArray(data.products)) {
           products = data.products;
           populateProducts();
+          populateProductList(); // nova lista
         } else {
           throw new Error(data?.message || 'Resposta inválida');
         }
       } catch (err) {
         console.warn('Erro ao buscar produtos', err);
         productDescription.innerHTML = '<option value=\"\">Erro ao carregar produtos</option>';
+        productListEl.innerHTML = '<div class="text-sm text-red-600 p-2">Erro ao carregar produtos.</div>';
       } finally {
         productDescription.disabled = false;
         // show form (hide skeleton)
@@ -346,6 +375,37 @@
         opt.dataset.type = p.type || '';
         productDescription.appendChild(opt);
       });
+    }
+
+    // ---------- NOVO: cria lista com checkbox + campo quantidade ----------
+    function populateProductList() {
+      productListEl.innerHTML = '';
+      if (!products.length) {
+        productListEl.innerHTML = '<div class="text-sm text-gray-500 p-2">Nenhum produto disponível.</div>';
+        return;
+      }
+      products.forEach((p, idx) => {
+        const row = document.createElement('div');
+        row.className = 'product-row flex items-center gap-3 p-2 rounded-md';
+        row.innerHTML = `
+          <label class="flex items-center gap-3 flex-1">
+            <input type="checkbox" class="product-checkbox" data-desc="${escapeAttr(p.description)}" data-type="${escapeAttr(p.type || '')}" />
+            <div class="flex-1">
+              <div class="font-medium text-sm">${escapeHtml(p.description)}</div>
+              <div class="text-xs text-gray-500">${p.type ? 'Tipo: ' + escapeHtml(p.type) : ''}</div>
+            </div>
+          </label>
+          <div class="flex items-center gap-2">
+            <input type="number" min="0" step="0.01" placeholder="Qtd" class="qty-input px-3 py-2 rounded-xl border border-gray-200 bg-white/70 focus-ring" data-desc="${escapeAttr(p.description)}" />
+          </div>
+        `;
+        productListEl.appendChild(row);
+      });
+    }
+
+    // helper para escapar em atributos
+    function escapeAttr(s) {
+      return String(s || '').replaceAll('"','&quot;').replaceAll("'", '&#39;');
     }
 
     // ---------- ORDERS: localStorage + render ----------
@@ -433,42 +493,131 @@
     }
 
     // ---------- FORM: interactions ----------
+    // keep compatibility with single product select (hidden)
     productDescription.addEventListener('change', () => {
       const opt = productDescription.selectedOptions[0];
-      productType.value = opt?.dataset?.type ?? '';
+      if (opt) productType.value = opt?.dataset?.type ?? '';
     });
 
-    orderForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // NOVO: adicionar múltiplos selecionados
+    addSelectedBtn.addEventListener('click', () => {
       const dateVal = orderDate.value || new Date().toISOString().split('T')[0];
-      const desc = productDescription.value;
-      const qty = parseFloat(orderQuantity.value);
-      const type = productType.value;
-      if (!desc || !type || !qty || qty <= 0) {
-        showMsg('Preencha todos os campos corretamente.', 'error');
+      const checkboxes = Array.from(document.querySelectorAll('.product-checkbox'));
+      const qtyInputs = Array.from(productListEl.querySelectorAll('.qty-input'));
+      const toAdd = [];
+
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          const desc = cb.dataset.desc || cb.getAttribute('data-desc') || '';
+          const type = cb.dataset.type || cb.getAttribute('data-type') || '';
+          // find qty input for this desc
+          const qtyEl = qtyInputs.find(i => i.getAttribute('data-desc') === desc);
+          const qtyVal = qtyEl ? parseFloat(qtyEl.value) : NaN;
+          if (!desc) return; // skip
+          if (!qtyVal || qtyVal <= 0) {
+            // skip invalid quantities but notify later
+            toAdd.push({ error: true, desc, type, qty: qtyVal });
+          } else {
+            toAdd.push({ error: false, desc, type, qty: qtyVal });
+          }
+        }
+      });
+
+      if (!toAdd.length) {
+        showMsg('Selecione ao menos um produto para adicionar.', 'error');
         return;
       }
-      const newOrder = { date: dateVal, description: desc, quantity: qty, type };
-      orders.unshift(newOrder); // mais recente primeiro
+
+      // check for any with invalid qty
+      const invalid = toAdd.filter(t => t.error);
+      if (invalid.length) {
+        showMsg('Alguns produtos selecionados não possuem quantidade válida. Corrija antes de adicionar.', 'error');
+        return;
+      }
+
+      // add all valid
+      toAdd.forEach(t => {
+        const newOrder = { date: dateVal, description: t.desc, quantity: t.qty, type: t.type || '' };
+        orders.unshift(newOrder);
+      });
       saveOrdersToStorage();
       renderOrders();
-      showMsg('Pedido adicionado com sucesso', 'success');
+      showMsg(`${toAdd.length} item(ns) adicionados com sucesso.`, 'success');
 
-      // try to send to Google Sheets (non-blocking)
-      try {
-        fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({ action:'saveOrder', orderData: newOrder })
-        }).catch(()=> console.warn('Falha ao enviar para Google Sheets (não crítico)'));
-      } catch (err) { console.warn(err); }
-
-      orderForm.reset();
-      orderTypeReset();
-      orderDate.value = new Date().toISOString().split('T')[0];
+      // clear selections and qtys
+      clearSelections();
     });
 
-    function orderTypeReset() { productType.value = ''; }
+    clearSelectionsBtn.addEventListener('click', clearSelections);
+
+    function clearSelections() {
+      document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+      document.querySelectorAll('.qty-input').forEach(q => q.value = '');
+      manualProductInput.value = '';
+      manualQuantityInput.value = '';
+    }
+
+    // single manual add (compatibility with previous "submit")
+    singleAddBtn.addEventListener('click', () => {
+      const dateVal = orderDate.value || new Date().toISOString().split('T')[0];
+      const desc = (manualProductInput.value || '').trim();
+      const qty = parseFloat(manualQuantityInput.value);
+      if (!desc || !qty || qty <= 0) {
+        showMsg('Preencha descrição e quantidade válidas para adicionar manualmente.', 'error');
+        return;
+      }
+      const newOrder = { date: dateVal, description: desc, quantity: qty, type: '' };
+      orders.unshift(newOrder);
+      saveOrdersToStorage();
+      renderOrders();
+      showMsg('Pedido manual adicionado com sucesso', 'success');
+      manualProductInput.value = '';
+      manualQuantityInput.value = '';
+    });
+
+    // keep original submit (falls back to old behavior if user submits form)
+   orderForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  // Campos do formulário tradicional
+  const dateVal = orderDate.value.trim();
+  const descriptionVal = productDescription.value.trim();
+  const quantityVal = parseFloat(orderQuantity.value.trim());
+  const typeVal = productType.value.trim();
+
+  // Validações básicas (compatibilidade total)
+  if (!dateVal || !descriptionVal || isNaN(quantityVal) || quantityVal <= 0) {
+    msg.textContent = "Preencha todos os campos corretamente.";
+    setTimeout(() => msg.textContent = '', 2000);
+    return;
+  }
+
+  // Item no formato padrão do sistema
+  const newItem = {
+    date: new Date(dateVal).toISOString().split('T')[0],
+    description: descriptionVal,
+    quantity: quantityVal,
+    type: typeVal
+  };
+
+  // Adiciona no topo (com prioridade às entradas mais recentes)
+  orders.unshift(newItem);
+
+  // Salva no localStorage
+  saveOrdersToStorage();
+
+  // Atualiza UI
+  renderOrders();
+
+  // Feedback ao usuário
+  msg.textContent = "Item adicionado!";
+  setTimeout(() => msg.textContent = '', 2000);
+
+  // Reset do formulário
+  orderForm.reset();
+  productType.value = '';
+});
+
 
     // ---------- PDF ----------
     document.getElementById('btnExportPDF').addEventListener('click', generatePDF);
@@ -512,7 +661,10 @@
         renderOrders();
       });
 
-      document.getElementById('clearForm').addEventListener('click', ()=> orderForm.reset());
+      document.getElementById('clearForm').addEventListener('click', ()=> {
+        orderForm.reset();
+        clearSelections();
+      });
       document.getElementById('openMenu').addEventListener('click', ()=> alert('Menu — aqui você pode adicionar links / páginas.'));
       document.getElementById('openListMobile').addEventListener('click', ()=> window.scrollTo({ top: 300, behavior:'smooth' }));
 
@@ -529,9 +681,11 @@
             el.className = 'p-3 rounded-lg border bg-white/60';
             el.innerHTML = `<div class="font-semibold">${escapeHtml(o.description)}</div><div class="text-sm text-gray-600">${formatDate(o.date)} — ${o.quantity}</div>`;
             ordersContainer.appendChild(el);
+            
           });
         });
       }
+      
     })();
   </script>
 </body>
