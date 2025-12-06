@@ -376,15 +376,19 @@
       if (!orders.length) { noOrders.classList.remove('hidden'); countInfo.textContent = '0 pedidos'; return; }
       noOrders.classList.add('hidden'); countInfo.textContent = `${orders.length} pedido(s)`;
 
-      orders.forEach((o, idx) => {
-        const card = document.createElement('div');
-        card.className = 'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl border border-gray-200 bg-white/60';
-        card.innerHTML = `
-          <div class="flex-1">
-            <div class="text-sm text-gray-500">Data: <span class="font-medium text-gray-700">${formatDate(o.date)}</span></div>
-            <div class="text-lg font-semibold text-gray-800">${escapeHtml(o.description)}</div>
-            <div class="text-sm text-gray-600">Qtd: <span class="font-medium">${o.quantity}</span> — Tipo: <span class="font-medium">${escapeHtml(o.type)}</span></div>
-          </div>
+      
+      orders.forEach((o, idx) => {
+        // NOVO CÓDIGO AQUI: Formata a quantidade para o padrão local (vírgula)
+        const formattedQuantity = formatNumberToLocal(o.quantity);
+        
+        const card = document.createElement('div');
+        card.className = 'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl border border-gray-200 bg-white/60';
+        card.innerHTML = `
+          <div class="flex-1">
+            <div class="text-sm text-gray-500">Data: <span class="font-medium text-gray-700">${formatDate(o.date)}</span></div>
+            <div class="text-lg font-semibold text-gray-800">${escapeHtml(o.description)}</div>
+            <div class="text-sm text-gray-600">Qtd: <span class="font-medium">${formattedQuantity}</span> — Tipo: <span class="font-medium">${escapeHtml(o.type)}</span></div>
+          </div>
           <div class="flex gap-2 items-center mt-2 sm:mt-0">
             <button class="viewBtn px-3 py-2 rounded-lg bg-white/70 border border-gray-200">Ver</button>
             <button class="deleteBtn px-3 py-2 rounded-lg bg-red-600 text-white">Excluir</button>
@@ -410,10 +414,10 @@
       panel.innerHTML = `
         <div class="flex items-start justify-between gap-4">
           <div>
-            <h3 class="text-lg font-bold">${escapeHtml(order.description)}</h3>
-            <p class="text-sm text-gray-600">Data: ${formatDate(order.date)}</p>
-            <p class="text-sm text-gray-600">Quantidade: ${order.quantity}</p>
-            <p class="text-sm text-gray-600">Tipo: ${escapeHtml(order.type)}</p>
+           <h3 class="text-lg font-bold">${escapeHtml(order.description)}</h3>
+            <p class="text-sm text-gray-600">Data: ${formatDate(order.date)}</p>
+            <p class="text-sm text-gray-600">Quantidade: ${formatNumberToLocal(order.quantity)}</p>
+            <p class="text-sm text-gray-600">Tipo: ${escapeHtml(order.type)}</p>
           </div>
           <div>
             <button id="closeDetails" class="px-3 py-2 rounded-lg bg-white/70">Fechar</button>
@@ -432,13 +436,19 @@
       const toAdd = [];
 
       rows.forEach(row => {
-        const cb = row.querySelector('.product-checkbox');
-        if (!cb || !cb.checked) return;
-        const desc = cb.dataset.desc || '';
-        const type = cb.dataset.type || '';
-        const qtyEl = row.querySelector('.qty-input');
-        const qtyVal = qtyEl ? parseFloat(qtyEl.value) : NaN;
-        if (!desc) return;
+        const cb = row.querySelector('.product-checkbox');
+        if (!cb || !cb.checked) return;
+        const desc = cb.dataset.desc || '';
+        const type = cb.dataset.type || '';
+        const qtyEl = row.querySelector('.qty-input');
+        
+        // NOVO CÓDIGO AQUI: 
+        // 1. Pega o valor (ex: "1,22" ou "1.22")
+        // 2. Substitui todas as vírgulas por pontos.
+        const rawQty = qtyEl ? qtyEl.value.replace(',', '.') : ''; 
+        // 3. Converte para número usando o ponto como decimal.
+        const qtyVal = parseFloat(rawQty);
+        if (!desc) return;
         if (!qtyVal || qtyVal <= 0) {
           // mark error and skip
           if (qtyEl) { qtyEl.classList.add('qty-error'); setTimeout(()=> qtyEl.classList.remove('qty-error'), 900); }
@@ -491,14 +501,30 @@
     const pdfTableBody = document.getElementById('pdfTableBody');
     const reportDate = document.getElementById('reportDate');
 
-    function generatePDF() {
-      if (!orders.length) return alert('Nenhum pedido para gerar o PDF.');
-      pdfTableBody.innerHTML = '';
-      orders.forEach(o => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="p-2 border">${formatDate(o.date)}</td><td class="p-2 border">${escapeHtml(o.description)}</td><td class="p-2 border">${o.quantity}</td><td class="p-2 border">${escapeHtml(o.type)}</td>`;
-        pdfTableBody.appendChild(tr);
-      });
+
+
+
+function formatNumberToLocal(num) {
+    // Usa toLocaleString para formatar o número, forçando a vírgula como separador decimal.
+    // 'pt-BR' é o locale padrão para o Brasil.
+    return num.toLocaleString('pt-BR', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+    });
+}
+
+   function generatePDF() {
+      if (!orders.length) return alert('Nenhum pedido para gerar o PDF.');
+      pdfTableBody.innerHTML = '';
+      orders.forEach(o => {
+        // Converte a quantidade para o formato local (com vírgula)
+        const formattedQuantity = formatNumberToLocal(o.quantity);
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="p-2 border">${formatDate(o.date)}</td><td class="p-2 border">${escapeHtml(o.description)}</td><td class="p-2 border">${formattedQuantity}</td><td class="p-2 border">${escapeHtml(o.type)}</td>`;
+        pdfTableBody.appendChild(tr);
+      });
+
       const now = new Date();
       reportDate.textContent = 'Data do Relatório: ' + now.toLocaleString('pt-BR');
       const opt = { margin: 0.5, filename: `Pedidos_GLGA_${now.getFullYear()}${now.getMonth()+1}${now.getDate()}.pdf`, image:{ type:'jpeg', quality:0.98 }, html2canvas:{ scale:2 }, jsPDF:{ unit:'in', format:'a4', orientation:'portrait' } };
