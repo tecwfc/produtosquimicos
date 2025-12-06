@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pedidos — GLGA</title>
+  <title>Pedidos — GLGA (melhorado)</title>
 
   <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,80 +12,39 @@
       theme: {
         extend: {
           fontFamily: { inter: ['Inter', 'sans-serif'] },
-          colors: {
-            primary: '#16a34a',
-            accent: '#10b981',
-            softgreen: '#e8fbea'
-          },
-          boxShadow: {
-            'soft-lg': '0 10px 30px rgba(16,24,40,0.08)'
-          }
+          colors: { primary: '#16a34a', accent: '#10b981', softgreen: '#e8fbea' },
+          boxShadow: { 'soft-lg': '0 10px 30px rgba(16,24,40,0.08)' }
         }
       }
     }
   </script>
 
   <style>
-    /* Glass basics + subtle background */
-    :root {
-      --glass-bg: rgba(255,255,255,0.55);
-      --glass-border: rgba(255,255,255,0.35);
-      --glass-bg-dark: rgba(17,24,39,0.45);
-      --glass-border-dark: rgba(255,255,255,0.06);
-    }
-    body {
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: radial-gradient(circle at 10% 20%, #e9fff0, #d6f7e3 20%, #eafaf0 60%);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+    :root { --glass-bg: rgba(255,255,255,0.55); --glass-border: rgba(255,255,255,0.35); --glass-bg-dark: rgba(17,24,39,0.45); --glass-border-dark: rgba(255,255,255,0.06); }
+    body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: radial-gradient(circle at 10% 20%, #e9fff0, #d6f7e3 20%, #eafaf0 60%); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    .glass { background: var(--glass-bg); backdrop-filter: blur(12px) saturate(120%); -webkit-backdrop-filter: blur(12px) saturate(120%); border: 1px solid var(--glass-border); }
+    .glass-dark { background: var(--glass-bg-dark); backdrop-filter: blur(12px) saturate(120%); -webkit-backdrop-filter: blur(12px) saturate(120%); border: 1px solid var(--glass-border-dark); }
 
-    .glass {
-      background: var(--glass-bg);
-      backdrop-filter: blur(12px) saturate(120%);
-      -webkit-backdrop-filter: blur(12px) saturate(120%);
-      border: 1px solid var(--glass-border);
-    }
-    .glass-dark {
-      background: var(--glass-bg-dark);
-      backdrop-filter: blur(12px) saturate(120%);
-      -webkit-backdrop-filter: blur(12px) saturate(120%);
-      border: 1px solid var(--glass-border-dark);
-    }
-
-    /* animations */
-    @keyframes floaty {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-6px); }
-      100% { transform: translateY(0px); }
-    }
+    @keyframes floaty { 0% { transform: translateY(0px); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0px); } }
     .floaty { animation: floaty 4s ease-in-out infinite; }
 
-    /* Skeleton */
-    .skeleton {
-      background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.2s linear infinite;
-    }
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-    /* small responsive tweaks */
-    @media (max-width: 640px) {
-      body { background: linear-gradient(180deg,#f6fff6,#f0f9ee); }
-    }
-
-    /* subtle focus ring override */
+    @media (max-width: 640px) { body { background: linear-gradient(180deg,#f6fff6,#f0f9ee); } }
     .focus-ring:focus { outline: none; box-shadow: 0 0 0 4px rgba(16,185,129,0.12); border-color: var(--tw-ring-color); }
-
-    /* product list small tweaks */
-    .product-row { transition: background .12s; }
-    .product-row:hover { background: rgba(16,185,129,0.03); }
+    .product-row { transition: background .12s, transform .12s; }
+    .product-row:hover { transform: translateY(-2px); }
     .qty-input { max-width: 120px; }
+
+    /* improved selected state */
+    .selected { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.25); }
+    .select-indicator { font-weight:700; color: #059669; }
+
+    /* error feedback */
+    .qty-error { border-color: #dc2626 !important; background: #fff5f5 !important; }
   </style>
-</head>
+<!-- <style>.manual-section, .search-section, .order-section{display:none !important;}</style></head> -->
 <body class="min-h-screen">
 
   <!-- NAVBAR FIXA -->
@@ -101,29 +60,28 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <div id="searchWrap" class="hidden sm:flex items-center gap-2 bg-white/60 rounded-full px-3 py-1 glass">
+       <div class="flex items-center gap-3">
+        <!-- <div id="searchWrap" class="hidden sm:flex items-center gap-2 bg-white/60 rounded-full px-3 py-1 glass">
           <input id="globalSearch" placeholder="Pesquisar pedido, produto..." class="bg-transparent text-sm w-56 focus:ring-0 focus:outline-none" />
           <button id="searchClear" class="text-xs text-gray-600 px-2">×</button>
-        </div>
+        </div> -->
 
         <button id="themeToggle" title="Alternar tema" class="p-2 rounded-lg hover:bg-white/30 transition">
           <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-700" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>
         </button>
 
-        <button id="openMenu" class="ml-1 px-3 py-1 bg-green-600 text-white rounded-xl shadow hover:bg-green-700 flex items-center gap-2">
+        <!-- <button id="openMenu" class="ml-1 px-3 py-1 bg-green-600 text-white rounded-xl shadow hover:bg-green-700 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
           <span class="text-sm">Menu</span>
-        </button>
-      </div>
+        </button> -->
+      </div> 
     </div>
   </header>
 
-  <!-- LAYOUT PRINCIPAL (centered card estilo app) -->
+  <!-- LAYOUT PRINCIPAL -->
   <main class="pt-28 pb-24 flex justify-center">
     <div class="w-[min(1100px,96%)]">
 
-      <!-- GRID: formulário + lista -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Coluna esquerda (form) -->
@@ -131,7 +89,6 @@
           <div class="glass rounded-2xl p-6 shadow-lg">
             <h2 class="text-lg font-bold text-gray-800 mb-4">➕ Novo Pedido</h2>
 
-            <!-- skeleton enquanto carrega produtos -->
             <div id="formSkeleton" class="space-y-3">
               <div class="h-10 rounded-lg skeleton"></div>
               <div class="h-10 rounded-lg skeleton"></div>
@@ -144,24 +101,21 @@
               <label class="text-sm text-gray-600">📅 Data</label>
               <input id="orderDate" type="date" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus-ring bg-white/70" required />
 
-              <label class="text-sm text-gray-600">🧪 Produto (selecione abaixo e informe quantidades)</label>
+              <label class="text-sm text-gray-600">🧪 Produtos (marque e informe quantidades)</label>
 
-              <!-- mantém o select (compatibilidade) mas também mostramos a lista com checkboxes -->
-              <select id="productDescription" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/70 focus-ring hidden" required>
-                <option value="">Carregando...</option>
-              </select>
+              <!-- search/filter for product list -->
+              <!-- <input id="productSearch" type="text" placeholder="Filtrar produtos..." class="w-full px-3 py-2 mb-2 rounded-xl border border-gray-200 bg-white/70 focus-ring" /> -->
 
-              <!-- NOVO: lista de produtos com checkbox + campo quantidade -->
               <div id="productList" class="max-h-56 overflow-auto border border-gray-100 rounded-lg p-2 bg-white/60"></div>
 
               <div class="flex items-center gap-2">
                 <button id="addSelectedBtn" type="button" class="flex-1 px-4 py-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white font-semibold shadow hover:scale-[1.01] transition">
-                  ➕ Adicionar selecionados
+                  ➕ Adicionar
                 </button>
                 <button id="clearSelections" type="button" class="px-4 py-3 rounded-xl border border-gray-200 text-gray-700 bg-white/60">Limpar seleção</button>
               </div>
 
-              <div id="singleAddDivider" class="text-center text-xs text-gray-400">ou adicionar 1 produto manualmente</div>
+              <!-- <div class="text-center text-xs text-gray-400">ou adicionar 1 produto manualmente</div>
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -179,24 +133,20 @@
                   ➕ Adicionar manual
                 </button>
                 <button id="clearForm" type="button" class="px-4 py-3 rounded-xl border border-gray-200 text-gray-700 bg-white/60">Limpar</button>
-              </div>
+              </div> -->
 
               <div id="messageBox" class="mt-3 text-sm hidden p-3 rounded-lg"></div>
             </form>
 
-            <!-- small helper
-            <p class="mt-4 text-xs text-gray-500">Os pedidos ficam salvos no seu navegador e enviados ao Google Sheets (se configurado).</p>
-          </div> -->
+            <div class="mt-4 block glass rounded-2xl p-4 shadow-md">
+              <h3 class="text-sm font-semibold text-gray-700">Ações rápidas</h3>
+              <div class="flex gap-2 mt-3">
+                <button id="btnExportPDF" class="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg">Exportar PDF</button>
+                <button id="btnClearAll" class="px-3 py-2 bg-red-100 text-red-700 rounded-lg">Limpar tudo</button>
+              </div>
+            </div>
 
-          <!-- mobile quick actions -->
-      <div class="mt-4 block glass rounded-2xl p-4 shadow-md">
-    <h3 class="text-sm font-semibold text-gray-700">Ações rápidas</h3>
-    <div class="flex gap-2 mt-3">
-        <button id="btnExportPDF" class="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg">Exportar PDF</button>
-        <button id="btnClearAll" class="px-3 py-2 bg-red-100 text-red-700 rounded-lg">Limpar tudo</button>
-    </div>
-</div>
-
+          </div>
         </section>
 
         <!-- Coluna central (lista) -->
@@ -207,8 +157,8 @@
               <div class="flex items-center gap-2">
                 <label class="text-sm text-gray-600 hidden sm:block">Ordenar:</label>
                 <select id="sortSelect" class="px-3 py-2 rounded-lg border border-gray-200 bg-white/70">
-                  <option value="new">Mais recentes</option>
-                  <option value="old">Mais antigos</option>
+                  <!-- <option value="new">Mais recentes</option>
+                  <option value="old">Mais antigos</option> -->
                 </select>
               </div>
             </div>
@@ -217,7 +167,6 @@
               <div id="noOrders" class="text-center text-gray-500 py-12">Nenhum pedido registrado ainda.</div>
             </div>
 
-            <!-- pagination / load more (mobile) -->
             <div class="mt-4 flex items-center justify-between">
               <div id="countInfo" class="text-sm text-gray-600">0 pedidos</div>
               <div class="flex items-center gap-2">
@@ -227,33 +176,28 @@
             </div>
           </div>
 
-          <!-- timeline / details -->
-          <div id="detailsPanel" class="mt-4 glass rounded-2xl p-4 shadow-lg hidden">
-            <!-- will be filled with JS when a card is clicked -->
-          </div>
+          <div id="detailsPanel" class="mt-4 glass rounded-2xl p-4 shadow-lg hidden"></div>
         </section>
       </div>
     </div>
   </main>
 
-  <!-- BOTTOM NAV MOBILE -->
   <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[min(600px,96%)] z-50 sm:hidden">
-    <div class="glass rounded-full p-2 flex justify-around items-center shadow-lg">
+    <!-- <div class="glass rounded-full p-2 flex justify-around items-center shadow-lg">
       <button class="flex flex-col items-center text-xs text-gray-700">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7h18M3 12h18M3 17h18" stroke-width="1.5"/></svg>
         Menu
-      </button>
-      <button id="fabAdd" class="relative -mt-6 w-14 h-14 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white shadow-lg floaty">
+      </button> -->
+      <!-- <button id="fabAdd" class="relative -mt-6 w-14 h-14 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white shadow-lg floaty">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14" stroke-width="2"/></svg>
-      </button>
-      <button id="openListMobile" class="flex flex-col items-center text-xs text-gray-700">
+      </button> -->
+      <!-- <button id="openListMobile" class="flex flex-col items-center text-xs text-gray-700">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7h18M3 12h18M3 17h18" stroke-width="1.5"/></svg>
         Pedidos
       </button>
-    </div>
+    </div> -->
   </nav>
 
-  <!-- PDF (oculto, usado para gerar arquivos) -->
   <div id="pdfContent" class="hidden p-6 max-w-3xl mx-auto glass">
     <h1 class="text-xl font-bold text-center text-primary">Pedido GLGA - Ivo Pita Indústria</h1>
     <p id="reportDate" class="text-center text-sm text-gray-600 mb-4"></p>
@@ -267,40 +211,32 @@
     </table>
   </div>
 
-  <!-- Libraries -->
   <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
 
-  <!-- MAIN JS -->
   <script>
     // ---------- CONFIG ----------
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHzCiHTdfZMbQXOZzoDrWKxkzutGcaZ1j-gFEaeqmw1pm8geKI50zzYRdwwhASswsjWQ/exec';
+
     const orderForm = document.getElementById('orderForm');
-    const productDescription = document.getElementById('productDescription');
-    const productType = document.getElementById('productType');
     const orderDate = document.getElementById('orderDate');
-    const orderQuantity = document.getElementById('orderQuantity');
     const messageBox = document.getElementById('messageBox');
     const ordersContainer = document.getElementById('ordersContainer');
     const noOrders = document.getElementById('noOrders');
     const formSkeleton = document.getElementById('formSkeleton');
     const formVisible = document.getElementById('orderForm');
-    const pdfContent = document.getElementById('pdfContent');
-    const pdfTableBody = document.getElementById('pdfTableBody');
-    const reportDate = document.getElementById('reportDate');
-    const countInfo = document.getElementById('countInfo');
 
-    // new elements
     const productListEl = document.getElementById('productList');
     const addSelectedBtn = document.getElementById('addSelectedBtn');
     const clearSelectionsBtn = document.getElementById('clearSelections');
-    const singleAddBtn = document.getElementById('singleAddBtn');
-    const manualProductInput = document.getElementById('manualProduct');
-    const manualQuantityInput = document.getElementById('manualQuantity');
+    //const singleAddBtn = document.getElementById('singleAddBtn');
+    //const manualProductInput = document.getElementById('manualProduct');
+   // const manualQuantityInput = document.getElementById('manualQuantity');
+    const productSearch = document.getElementById('productSearch');
 
     let products = [];
     let orders = [];
 
-    // ---------- THEME ----------
+    // theme
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
     const bodyEl = document.body;
@@ -310,11 +246,11 @@
         bodyEl.classList.add('dark');
         document.documentElement.style.setProperty('--glass-bg', 'rgba(17,24,39,0.55)');
         document.documentElement.style.setProperty('--glass-border', 'rgba(255,255,255,0.06)');
-        themeIcon.innerHTML = '<path d=\"M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z\"/>';
+        themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
       } else {
         document.documentElement.style.setProperty('--glass-bg', 'rgba(255,255,255,0.55)');
         document.documentElement.style.setProperty('--glass-border', 'rgba(255,255,255,0.35)');
-        themeIcon.innerHTML = '<path d=\"M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z\"/>';
+        themeIcon.innerHTML = '<path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z"/>';
       }
       localStorage.setItem('ui-theme', theme);
     }
@@ -339,94 +275,106 @@
       setTimeout(()=> messageBox.classList.add('hidden'), 2500);
     }
 
-    // ---------- FETCH PRODUCTS (com skeleton) ----------
+    // ---------- FETCH PRODUCTS ----------
     async function fetchProducts() {
-      productDescription.innerHTML = '<option value=\"\">Carregando produtos...</option>';
-      productDescription.disabled = true;
+      productListEl.innerHTML = '<div class="text-sm text-gray-500 p-2">Carregando produtos...</div>';
       try {
-        // cache bust
         const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProducts&t=${Date.now()}`);
         const data = await res.json();
         if (data?.status === 'success' && Array.isArray(data.products)) {
           products = data.products;
-          populateProducts();
-          populateProductList(); // nova lista
+          populateProductList();
         } else {
           throw new Error(data?.message || 'Resposta inválida');
         }
       } catch (err) {
         console.warn('Erro ao buscar produtos', err);
-        productDescription.innerHTML = '<option value=\"\">Erro ao carregar produtos</option>';
         productListEl.innerHTML = '<div class="text-sm text-red-600 p-2">Erro ao carregar produtos.</div>';
       } finally {
-        productDescription.disabled = false;
-        // show form (hide skeleton)
         formSkeleton.classList.add('hidden');
         formVisible.classList.remove('hidden');
       }
     }
 
-    function populateProducts() {
-      productDescription.innerHTML = '<option value=\"\">Selecione um produto</option>';
-      products.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.description;
-        opt.textContent = p.description + (p.type ? ` — ${p.type}` : '');
-        opt.dataset.type = p.type || '';
-        productDescription.appendChild(opt);
-      });
-    }
+    // helpers
+    function escapeAttr(s) { return String(s || '').replaceAll('"','&quot;').replaceAll("'", '&#39;'); }
+    function escapeHtml(s) { return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
-    // ---------- NOVO: cria lista com checkbox + campo quantidade ----------
+    // ---------- improved product list as cards ----------
     function populateProductList() {
       productListEl.innerHTML = '';
       if (!products.length) {
         productListEl.innerHTML = '<div class="text-sm text-gray-500 p-2">Nenhum produto disponível.</div>';
         return;
       }
-      products.forEach((p, idx) => {
+
+      products.forEach((p) => {
         const row = document.createElement('div');
-        row.className = 'product-row flex items-center gap-3 p-2 rounded-md';
+        row.className = 'product-row flex items-center gap-3 p-3 rounded-xl border border-gray-200 bg-white/70 mb-2 cursor-pointer';
+
         row.innerHTML = `
-          <label class="flex items-center gap-3 flex-1">
-            <input type="checkbox" class="product-checkbox" data-desc="${escapeAttr(p.description)}" data-type="${escapeAttr(p.type || '')}" />
-            <div class="flex-1">
-              <div class="font-medium text-sm">${escapeHtml(p.description)}</div>
-              <div class="text-xs text-gray-500">${p.type ? 'Tipo: ' + escapeHtml(p.type) : ''}</div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-medium text-sm">${escapeHtml(p.description)}</div>
+                <div class="text-xs text-gray-500">${p.type ? 'Tipo: ' + escapeHtml(p.type) : ''}</div>
+              </div>
+              <div class="select-indicator hidden">✔</div>
             </div>
-          </label>
+          </div>
+
           <div class="flex items-center gap-2">
             <input type="number" min="0" step="0.01" placeholder="Qtd" class="qty-input px-3 py-2 rounded-xl border border-gray-200 bg-white/70 focus-ring" data-desc="${escapeAttr(p.description)}" />
           </div>
+
+          <input type="checkbox" class="hidden product-checkbox" data-desc="${escapeAttr(p.description)}" data-type="${escapeAttr(p.type || '')}" />
         `;
+
+        // clicking the row toggles selection except when clicking the qty input
+        row.addEventListener('click', (e) => {
+          if (e.target && (e.target.tagName === 'INPUT' || e.target.closest('input'))) return;
+          const cb = row.querySelector('.product-checkbox');
+          cb.checked = !cb.checked;
+          toggleRowSelected(row, cb.checked);
+        });
+
+        // when checkbox changed elsewhere, sync visuals
+        row.querySelector('.product-checkbox').addEventListener('change', (e) => {
+          toggleRowSelected(row, e.target.checked);
+        });
+
         productListEl.appendChild(row);
       });
     }
 
-    // helper para escapar em atributos
-    function escapeAttr(s) {
-      return String(s || '').replaceAll('"','&quot;').replaceAll("'", '&#39;');
+    function toggleRowSelected(row, active) {
+      const indicator = row.querySelector('.select-indicator');
+      if (active) {
+        row.classList.add('selected');
+        indicator.classList.remove('hidden');
+      } else {
+        row.classList.remove('selected');
+        indicator.classList.add('hidden');
+      }
     }
 
-    // ---------- ORDERS: localStorage + render ----------
-    function loadOrdersFromStorage() {
-      orders = JSON.parse(localStorage.getItem('orders') || '[]');
-      renderOrders();
-    }
+    // filter
+   // productSearch.addEventListener('input', () => {
+     // const q = productSearch.value.trim().toLowerCase();
+      //document.querySelectorAll('#productList .product-row').forEach(row => {
+        //const text = row.innerText.toLowerCase();
+        //row.style.display = text.includes(q) ? 'flex' : 'none';
+     // });
+    //});
 
-    function saveOrdersToStorage() {
-      localStorage.setItem('orders', JSON.stringify(orders));
-    }
+    // ---------- ORDERS ----------
+    function loadOrdersFromStorage() { orders = JSON.parse(localStorage.getItem('orders') || '[]'); renderOrders(); }
+    function saveOrdersToStorage() { localStorage.setItem('orders', JSON.stringify(orders)); }
 
     function renderOrders() {
       ordersContainer.innerHTML = '';
-      if (!orders.length) {
-        noOrders.classList.remove('hidden');
-        countInfo.textContent = '0 pedidos';
-        return;
-      }
-      noOrders.classList.add('hidden');
-      countInfo.textContent = `${orders.length} pedido(s)`;
+      if (!orders.length) { noOrders.classList.remove('hidden'); countInfo.textContent = '0 pedidos'; return; }
+      noOrders.classList.add('hidden'); countInfo.textContent = `${orders.length} pedido(s)`;
 
       orders.forEach((o, idx) => {
         const card = document.createElement('div');
@@ -442,35 +390,20 @@
             <button class="deleteBtn px-3 py-2 rounded-lg bg-red-600 text-white">Excluir</button>
           </div>
         `;
-        // animation entry
         card.style.opacity = 0;
         ordersContainer.appendChild(card);
         setTimeout(()=> card.style.opacity = 1, 50 + idx*30);
 
-        // events
         card.querySelector('.deleteBtn').addEventListener('click', () => {
           if (!confirm('Excluir este pedido?')) return;
-          orders.splice(idx,1);
-          saveOrdersToStorage();
-          renderOrders();
-          showMsg('Pedido excluído', 'success');
+          orders.splice(idx,1); saveOrdersToStorage(); renderOrders(); showMsg('Pedido excluído', 'success');
         });
 
-        card.querySelector('.viewBtn').addEventListener('click', () => {
-          showDetails(o);
-        });
+        card.querySelector('.viewBtn').addEventListener('click', () => { showDetails(o); });
       });
     }
 
-    function formatDate(iso) {
-      try {
-        const [y,m,d] = iso.split('-');
-        return `${d}/${m}/${y}`;
-      } catch { return iso; }
-    }
-    function escapeHtml(s) {
-      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-    }
+    function formatDate(iso) { try { const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; } catch { return iso; } }
 
     function showDetails(order) {
       const panel = document.getElementById('detailsPanel');
@@ -492,139 +425,71 @@
       panel.scrollIntoView({ behavior:'smooth', block:'center' });
     }
 
-    // ---------- FORM: interactions ----------
-    // keep compatibility with single product select (hidden)
-    productDescription.addEventListener('change', () => {
-      const opt = productDescription.selectedOptions[0];
-      if (opt) productType.value = opt?.dataset?.type ?? '';
-    });
-
-    // NOVO: adicionar múltiplos selecionados
+    // ---------- FORM ACTIONS ----------
     addSelectedBtn.addEventListener('click', () => {
       const dateVal = orderDate.value || new Date().toISOString().split('T')[0];
-      const checkboxes = Array.from(document.querySelectorAll('.product-checkbox'));
-      const qtyInputs = Array.from(productListEl.querySelectorAll('.qty-input'));
+      const rows = Array.from(document.querySelectorAll('#productList .product-row'));
       const toAdd = [];
 
-      checkboxes.forEach(cb => {
-        if (cb.checked) {
-          const desc = cb.dataset.desc || cb.getAttribute('data-desc') || '';
-          const type = cb.dataset.type || cb.getAttribute('data-type') || '';
-          // find qty input for this desc
-          const qtyEl = qtyInputs.find(i => i.getAttribute('data-desc') === desc);
-          const qtyVal = qtyEl ? parseFloat(qtyEl.value) : NaN;
-          if (!desc) return; // skip
-          if (!qtyVal || qtyVal <= 0) {
-            // skip invalid quantities but notify later
-            toAdd.push({ error: true, desc, type, qty: qtyVal });
-          } else {
-            toAdd.push({ error: false, desc, type, qty: qtyVal });
-          }
+      rows.forEach(row => {
+        const cb = row.querySelector('.product-checkbox');
+        if (!cb || !cb.checked) return;
+        const desc = cb.dataset.desc || '';
+        const type = cb.dataset.type || '';
+        const qtyEl = row.querySelector('.qty-input');
+        const qtyVal = qtyEl ? parseFloat(qtyEl.value) : NaN;
+        if (!desc) return;
+        if (!qtyVal || qtyVal <= 0) {
+          // mark error and skip
+          if (qtyEl) { qtyEl.classList.add('qty-error'); setTimeout(()=> qtyEl.classList.remove('qty-error'), 900); }
+          toAdd.push({ error: true, desc, type, qty: qtyVal });
+        } else {
+          toAdd.push({ error: false, desc, type, qty: qtyVal });
         }
       });
 
-      if (!toAdd.length) {
-        showMsg('Selecione ao menos um produto para adicionar.', 'error');
-        return;
-      }
-
-      // check for any with invalid qty
+      if (!toAdd.length) { showMsg('Selecione ao menos um produto para adicionar.', 'error'); return; }
       const invalid = toAdd.filter(t => t.error);
-      if (invalid.length) {
-        showMsg('Alguns produtos selecionados não possuem quantidade válida. Corrija antes de adicionar.', 'error');
-        return;
-      }
+      if (invalid.length) { showMsg('Alguns produtos selecionados não possuem quantidade válida. Corrija antes de adicionar.', 'error'); return; }
 
-      // add all valid
-      toAdd.forEach(t => {
-        const newOrder = { date: dateVal, description: t.desc, quantity: t.qty, type: t.type || '' };
-        orders.unshift(newOrder);
-      });
-      saveOrdersToStorage();
-      renderOrders();
-      showMsg(`${toAdd.length} item(ns) adicionados com sucesso.`, 'success');
-
-      // clear selections and qtys
+      toAdd.forEach(t => { orders.unshift({ date: dateVal, description: t.desc, quantity: t.qty, type: t.type || '' }); });
+      saveOrdersToStorage(); renderOrders(); showMsg(`${toAdd.length} item(ns) adicionados com sucesso.`, 'success');
       clearSelections();
     });
 
     clearSelectionsBtn.addEventListener('click', clearSelections);
-
     function clearSelections() {
       document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
       document.querySelectorAll('.qty-input').forEach(q => q.value = '');
-      manualProductInput.value = '';
-      manualQuantityInput.value = '';
+      document.querySelectorAll('.product-row').forEach(r => r.classList.remove('selected'));
+      document.querySelectorAll('.select-indicator').forEach(i => i.classList.add('hidden'));
+      //manualProductInput.value = '';
+      //manualQuantityInput.value = '';
     }
 
-    // single manual add (compatibility with previous "submit")
-    singleAddBtn.addEventListener('click', () => {
-      const dateVal = orderDate.value || new Date().toISOString().split('T')[0];
-      const desc = (manualProductInput.value || '').trim();
-      const qty = parseFloat(manualQuantityInput.value);
-      if (!desc || !qty || qty <= 0) {
-        showMsg('Preencha descrição e quantidade válidas para adicionar manualmente.', 'error');
-        return;
-      }
-      const newOrder = { date: dateVal, description: desc, quantity: qty, type: '' };
-      orders.unshift(newOrder);
-      saveOrdersToStorage();
-      renderOrders();
-      showMsg('Pedido manual adicionado com sucesso', 'success');
-      manualProductInput.value = '';
-      manualQuantityInput.value = '';
+    //singleAddBtn.addEventListener('click', () => {
+      //const dateVal = orderDate.value || new Date().toISOString().split('T')[0];
+      //const desc = (manualProductInput.value || '').trim();
+      //const qty = parseFloat(manualQuantityInput.value);
+      //if (!desc || !qty || qty <= 0) { showMsg('Preencha descrição e quantidade válidas para adicionar manualmente.', 'error'); return; }
+      //const newOrder = { date: dateVal, description: desc, quantity: qty, type: '' };
+      //orders.unshift(newOrder); saveOrdersToStorage(); renderOrders(); showMsg('Pedido manual adicionado com sucesso', 'success');
+      //manualProductInput.value = ''; manualQuantityInput.value = '';
+    //});
+
+    // fallback old submit (kept for compatibility)
+    orderForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showMsg('Use a lista de produtos ou o campo manual para adicionar itens.', 'info');
     });
-
-    // keep original submit (falls back to old behavior if user submits form)
-   orderForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  // Campos do formulário tradicional
-  const dateVal = orderDate.value.trim();
-  const descriptionVal = productDescription.value.trim();
-  const quantityVal = parseFloat(orderQuantity.value.trim());
-  const typeVal = productType.value.trim();
-
-  // Validações básicas (compatibilidade total)
-  if (!dateVal || !descriptionVal || isNaN(quantityVal) || quantityVal <= 0) {
-    msg.textContent = "Preencha todos os campos corretamente.";
-    setTimeout(() => msg.textContent = '', 2000);
-    return;
-  }
-
-  // Item no formato padrão do sistema
-  const newItem = {
-    date: new Date(dateVal).toISOString().split('T')[0],
-    description: descriptionVal,
-    quantity: quantityVal,
-    type: typeVal
-  };
-
-  // Adiciona no topo (com prioridade às entradas mais recentes)
-  orders.unshift(newItem);
-
-  // Salva no localStorage
-  saveOrdersToStorage();
-
-  // Atualiza UI
-  renderOrders();
-
-  // Feedback ao usuário
-  msg.textContent = "Item adicionado!";
-  setTimeout(() => msg.textContent = '', 2000);
-
-  // Reset do formulário
-  orderForm.reset();
-  productType.value = '';
-});
-
 
     // ---------- PDF ----------
     document.getElementById('btnExportPDF').addEventListener('click', generatePDF);
-    document.getElementById('fabAdd').addEventListener('click', ()=> {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.getElementById('orderDate').focus();
-    });
+    //document.getElementById('fabAdd').addEventListener('click', ()=> { window.scrollTo({ top: 0, behavior: 'smooth' }); document.getElementById('orderDate').focus(); });
+
+    const pdfContent = document.getElementById('pdfContent');
+    const pdfTableBody = document.getElementById('pdfTableBody');
+    const reportDate = document.getElementById('reportDate');
 
     function generatePDF() {
       if (!orders.length) return alert('Nenhum pedido para gerar o PDF.');
@@ -636,13 +501,7 @@
       });
       const now = new Date();
       reportDate.textContent = 'Data do Relatório: ' + now.toLocaleString('pt-BR');
-      const opt = {
-        margin: 0.5,
-        filename: `Pedidos_GLGA_${now.getFullYear()}${now.getMonth()+1}${now.getDate()}.pdf`,
-        image:{ type:'jpeg', quality:0.98 },
-        html2canvas:{ scale:2 },
-        jsPDF:{ unit:'in', format:'a4', orientation:'portrait' }
-      };
+      const opt = { margin: 0.5, filename: `Pedidos_GLGA_${now.getFullYear()}${now.getMonth()+1}${now.getDate()}.pdf`, image:{ type:'jpeg', quality:0.98 }, html2canvas:{ scale:2 }, jsPDF:{ unit:'in', format:'a4', orientation:'portrait' } };
       pdfContent.classList.remove('hidden');
       html2pdf().set(opt).from(pdfContent).save().then(()=> { pdfContent.classList.add('hidden'); });
     }
@@ -650,25 +509,13 @@
     // ---------- INITIALIZE ----------
     (function init(){
       orderDate.value = new Date().toISOString().split('T')[0];
-      fetchProducts();
-      loadOrdersFromStorage();
+      fetchProducts(); loadOrdersFromStorage();
 
-      // quick buttons
-      document.getElementById('btnClearAll').addEventListener('click', ()=> {
-        if (!confirm('Limpar todos os pedidos?')) return;
-        orders = [];
-        saveOrdersToStorage();
-        renderOrders();
-      });
-
-      document.getElementById('clearForm').addEventListener('click', ()=> {
-        orderForm.reset();
-        clearSelections();
-      });
+      document.getElementById('btnClearAll').addEventListener('click', ()=> { if (!confirm('Limpar todos os pedidos?')) return; orders = []; saveOrdersToStorage(); renderOrders(); });
+      document.getElementById('clearForm').addEventListener('click', ()=> { orderForm.reset(); clearSelections(); });
       document.getElementById('openMenu').addEventListener('click', ()=> alert('Menu — aqui você pode adicionar links / páginas.'));
       document.getElementById('openListMobile').addEventListener('click', ()=> window.scrollTo({ top: 300, behavior:'smooth' }));
 
-      // basic search (client-side)
       const searchInput = document.getElementById('globalSearch');
       if (searchInput) {
         searchInput.addEventListener('input', ()=> {
@@ -681,11 +528,10 @@
             el.className = 'p-3 rounded-lg border bg-white/60';
             el.innerHTML = `<div class="font-semibold">${escapeHtml(o.description)}</div><div class="text-sm text-gray-600">${formatDate(o.date)} — ${o.quantity}</div>`;
             ordersContainer.appendChild(el);
-            
           });
         });
       }
-      
+
     })();
   </script>
 </body>
