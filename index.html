@@ -473,16 +473,33 @@ function sendWhatsApp() {
     window.open(`https://wa.me/?text=${msg}`, '_blank');
 }
 
-// Inicialização
-window.onload = fetchProducts;
-generateCartPDFBtn.onclick = generatePDFFromCart;
-sendWhatsAppBtn.onclick = sendWhatsApp;
-        // ---------- INITIALIZATION ----------
-        generateCartPDFBtn.addEventListener('click', generatePDFFromCart);
-        fetchProducts(); // Carrega produtos e renderiza o carrinho carregado
+ // ---------- INITIALIZATION ----------
+
+      window.onload = () => {
+        fetchProducts(); // Carrega os produtos da planilha
+
+        // Configura os cliques dos botões uma única vez
+        if (generateCartPDFBtn)
+          generateCartPDFBtn.onclick = generatePDFFromCart;
+        if (sendWhatsAppBtn) sendWhatsAppBtn.onclick = sendWhatsApp;
+
+        if (clearCartBtn) {
+          clearCartBtn.onclick = () => {
+            if (confirm("Deseja realmente esvaziar o carrinho?")) {
+              cart = [];
+              saveCart();
+              renderCart();
+              updateProductIndicators();
+              showMsg("Carrinho limpo!");
+            }
+          };
+        }
+      };
+
     </script>
 
 
 </body>
 
 </html>      
+
