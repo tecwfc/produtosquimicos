@@ -174,9 +174,7 @@
           <div
             class="flex items-center gap-2 border-l border-gray-200 dark:border-white/10 pl-4"
           >
-            <span
-              class="text-sm text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap"
-            >
+            <span class="text-sm text-black font-semibold whitespace-nowrap">
               Ivo Pita indústria
             </span>
 
@@ -321,7 +319,7 @@
       </div>
     </main>
 
-    <div id="pdfContent" class="hidden p-6 max-w-3xl mx-auto glass">
+    <div id="pdfContent" class="hidden p-6 max-w-3xl mx-auto bg-white text-black">
       <h1 class="text-xl font-bold text-center text-primary">
         Pedido GLGA - Ivo Pita Indústria
       </h1>
@@ -344,8 +342,8 @@
     <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
 
     <script>
-      // ---------- CONFIG & ELEMENTS ----------
-      // URL do Google Apps Script é mantida APENAS para buscar a lista de produtos.
+// ---------- CONFIG & ELEMENTS ----------
+// URL do Google Apps Script é mantida APENAS para buscar a lista de produtos.
       const GOOGLE_SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbzHzCiHTdfZMbQXOZzoDrWKxkzutGcaZ1j-gFEaeqmw1pm8geKI50zzYRdwwhASswsjWQ/exec";
       const CART_STORAGE_KEY = "glga_ivo_cart_items"; // Chave para localStorage
@@ -887,42 +885,46 @@
       generateCartPDFBtn.addEventListener("click", generatePDFFromCart);
       fetchProducts(); // Carrega produtos e renderiza o carrinho carregado
 
-
       //ENVIA DIRETO PARA WHATSAPP
-      document.getElementById("sendWhatsAppBtn").addEventListener("click", () => {
-    // Filtra apenas itens com quantidade
-    const itemsToSendMessage = cart.filter(item => item.quantity > 0);
+      document
+        .getElementById("sendWhatsAppBtn")
+        .addEventListener("click", () => {
+          // Filtra apenas itens com quantidade
+          const itemsToSendMessage = cart.filter((item) => item.quantity > 0);
 
-    if (!itemsToSendMessage.length) {
-        showMsg("O carrinho está vazio!", "error");
-        return;
-    }
+          if (!itemsToSendMessage.length) {
+            showMsg("O carrinho está vazio!", "error");
+            return;
+          }
 
-    // Montando o texto da mensagem
-    let message = `*PEDIDO - IVO PITA - GLGA*\n`;
-    message += `*Data:* ${formatDate(orderDate.value)}\n`;
-    message += `----------------------------\n\n`;
+          // Montando o texto da mensagem
+          let message = `*PEDIDO - IVO PITA - GLGA*\n`;
+          message += `*Data:* ${formatDate(orderDate.value)}\n`;
+          message += `----------------------------\n\n`;
 
-    itemsToSendMessage.forEach(item => {
-        message += `✅ *${item.description}*\n`;
-        message += `   Qtd: ${formatNumberToLocal(item.quantity)} ${item.type}\n\n`;
-    });
+          itemsToSendMessage.forEach((item) => {
+            message += `✅ *${item.description}*\n`;
+            message += `   Qtd: ${formatNumberToLocal(item.quantity)} ${item.type}\n\n`;
+          });
 
-    const totalQtd = itemsToSendMessage.reduce((sum, i) => sum + i.quantity, 0);
-    message += `----------------------------\n`;
-    message += `*Total de itens:* ${itemsToSendMessage.length}\n`;
-    message += `*Volume Total:* ${formatNumberToLocal(totalQtd)}\n\n`;
-    message += `_Gerado via App Pedidos_`;
+          const totalQtd = itemsToSendMessage.reduce(
+            (sum, i) => sum + i.quantity,
+            0,
+          );
+          message += `----------------------------\n`;
+          message += `*Total de itens:* ${itemsToSendMessage.length}\n`;
+          message += `*Volume Total:* ${formatNumberToLocal(totalQtd)}\n\n`;
+          message += `_Gerado via App Pedidos_`;
 
-    // Codifica a mensagem
-    const encodedMessage = encodeURIComponent(message);
-    
-    // URL SEM O NÚMERO (Abre a lista de contatos)
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+          // Codifica a mensagem
+          const encodedMessage = encodeURIComponent(message);
 
-    // Abre em uma nova aba/app
-    window.open(whatsappUrl, "_blank");
-});
+          // URL SEM O NÚMERO (Abre a lista de contatos)
+          const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+
+          // Abre em uma nova aba/app
+          window.open(whatsappUrl, "_blank");
+        });
     </script>
   </body>
 </html>
