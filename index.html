@@ -160,45 +160,45 @@
       <div
         class="glass rounded-3xl px-4 py-3 flex items-center justify-between shadow-soft-lg"
       >
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-4">
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white shadow"
+            class="w-12 h-12 flex items-center justify-center shrink-0 rounded-full overflow-hidden border-2 border-white shadow-sm bg-white"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-6 h-6"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M3 3h18v4H3zM5 11h14v10H5z" />
-            </svg>
+            <img
+              src="assets/logo_IvoPIta.png"
+              alt="Logo Ivo Pita"
+              class="w-full h-full object-cover"
+            />
           </div>
-          <div>
-            <div class="text-sm text-gray-700 font-semibold">
-              Ivo Pita - Pedido GLGA
-            </div>
+
+          <div
+            class="flex items-center gap-2 border-l border-gray-200 dark:border-white/10 pl-4"
+          >
+            <span
+              class="text-sm text-gray-700 dark:text-gray-200 font-semibold whitespace-nowrap"
+            >
+              Ivo Pita indústria
+            </span>
+
+            <button
+              id="themeToggle"
+              title="Alternar tema"
+              class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition"
+            >
+              <svg
+                id="themeIcon"
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5 text-green-700"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              ></svg>
+            </button>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <button
-            id="themeToggle"
-            title="Alternar tema"
-            class="p-2 rounded-lg hover:bg-white/30 transition"
-          >
-            <svg
-              id="themeIcon"
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-6 h-6 text-green-700"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path
-                d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z"
-              />
-            </svg>
-          </button>
-        </div>
+        <!-- <div class="hidden sm:block">
+      <span class="text-[10px] uppercase tracking-widest text-gray-400">Oficial</span>
+    </div> -->
       </div>
     </header>
 
@@ -295,6 +295,19 @@
                 </button>
 
                 <button
+                  id="sendWhatsAppBtn"
+                  type="button"
+                  class="mt-2 w-full px-4 py-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white font-semibold shadow hover:scale-[1.01] transition flex items-center justify-center gap-2"
+                >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.411-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
+                    />
+                  </svg>
+                  Enviar via WhatsApp
+                </button>
+
+                <button
                   id="clearCartBtn"
                   type="button"
                   class="mt-2 w-full px-4 py-2 rounded-xl bg-red-100 text-red-600 font-medium hover:bg-red-200 transition"
@@ -314,7 +327,7 @@
       </h1>
       <p id="reportDate" class="text-center text-sm text-gray-600 mb-4"></p>
       <p class="text-center text-xs text-gray-500 mb-6">
-        PDF gerado diretamente do carrinho de pedidos.
+        <!-- PDF gerado diretamente do carrinho de pedidos. -->
       </p>
       <table class="w-full text-sm border-collapse">
         <thead class="bg-green-600 text-white">
@@ -873,6 +886,43 @@
       // ---------- INITIALIZATION ----------
       generateCartPDFBtn.addEventListener("click", generatePDFFromCart);
       fetchProducts(); // Carrega produtos e renderiza o carrinho carregado
+
+
+      //ENVIA DIRETO PARA WHATSAPP
+      document.getElementById("sendWhatsAppBtn").addEventListener("click", () => {
+    // Filtra apenas itens com quantidade
+    const itemsToSendMessage = cart.filter(item => item.quantity > 0);
+
+    if (!itemsToSendMessage.length) {
+        showMsg("O carrinho está vazio!", "error");
+        return;
+    }
+
+    // Montando o texto da mensagem
+    let message = `*PEDIDO - IVO PITA - GLGA*\n`;
+    message += `*Data:* ${formatDate(orderDate.value)}\n`;
+    message += `----------------------------\n\n`;
+
+    itemsToSendMessage.forEach(item => {
+        message += `✅ *${item.description}*\n`;
+        message += `   Qtd: ${formatNumberToLocal(item.quantity)} ${item.type}\n\n`;
+    });
+
+    const totalQtd = itemsToSendMessage.reduce((sum, i) => sum + i.quantity, 0);
+    message += `----------------------------\n`;
+    message += `*Total de itens:* ${itemsToSendMessage.length}\n`;
+    message += `*Volume Total:* ${formatNumberToLocal(totalQtd)}\n\n`;
+    message += `_Gerado via App Pedidos_`;
+
+    // Codifica a mensagem
+    const encodedMessage = encodeURIComponent(message);
+    
+    // URL SEM O NÚMERO (Abre a lista de contatos)
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+
+    // Abre em uma nova aba/app
+    window.open(whatsappUrl, "_blank");
+});
     </script>
   </body>
 </html>
