@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pedido Ivo Pita — GLGA (Apenas Carrinho/PDF)</title>
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#16a34a', accent: '#10b981', softgreen: '#e8fbea' },
+                    boxShadow: { 'soft-lg': '0 10px 30px rgba(16,24,40,0.08)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* (Estilos mantidos) */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-bg-dark: rgba(17, 24, 39, 0.55);
+            --glass-border-dark: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: radial-gradient(circle at 10% 20%, #e9fff0, #d6f7e3 20%, #eafaf0 60%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px) saturate(120%);
+            -webkit-backdrop-filter: blur(12px) saturate(120%);
+            border: 1px solid var(--glass-border);
+        }
+
+        .glass-dark {
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(12px) saturate(120%);
+            -webkit-backdrop-filter: blur(12px) saturate(120%);
+            border: 1px solid var(--glass-border-dark);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                background: linear-gradient(180deg, #f6fff6, #f0f9ee);
+            }
+        }
+
+        .focus-ring:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(10, 185, 129, 0.12);
+            border-color: var(--tw-ring-color);
+        }
+
+        .product-row {
+            transition: background .12s, transform .12s, box-shadow .12s;
+        }
+
+        .product-row:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+        }
+
+        /* Estilo para inputs de quantidade (E-commerce look) */
+        .qty-input {
+            transition: background .12s, border-color .12s;
+            width: 50px;
+            text-align: center;
+            font-size: 0.875rem;
+            padding: 0.5rem 0.25rem;
+            height: 32px;
+            border: 1px solid #d1d5db;
+        }
+
+        .qty-error {
+            border-color: #dc2626 !important;
+            background: #fff5f5 !important;
+        }
+
+        .qty-btn-minus,
+        .qty-btn-plus {
+            border: 1px solid #d1d5db;
+        }
+
+        .qty-btn-minus {
+            border-right: none;
+        }
+
+        .qty-btn-plus {
+            border-left: none;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 25%, rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0.06) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#16a34a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3502/3502601.png">
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+
+
+</head>
+
+<body class="min-h-screen">
+
+    <header id="mainHeader" class="fixed top-4 left-1/2 -translate-x-1/2 w-[min(797px,96%)] z-50">
+        <div class="glass rounded-3xl px-4 py-3 flex items-center justify-between shadow-soft-lg">
+
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white shadow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 3h18v4H3zM5 11h14v10H5z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-700 font-semibold">Ivo Pita - Pedido GLGA</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button id="themeToggle" title="Alternar tema" class="p-2 rounded-lg hover:bg-white/30 transition">
+                    <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-700"
+                        viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-28 pb-24 flex justify-center">
+        <div class="w-[min(800px,96%)]">
+            <div class="grid grid-cols-1 gap-6">
+
+                <section class="col-span-1 space-y-6">
+
+                    <div class="glass rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">🛒 Selecionar Produtos</h2>
+
+                        <div class="mb-5">
+                            <label class="text-sm font-semibold text-gray-700">📅 Data/Referência do Pedido</label>
+                            <input id="orderDate" type="date"
+                                class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-200 focus-ring bg-white/70"
+                                required />
+                        </div>
+
+                        <div id="formSkeleton" class="space-y-3">
+                            <div class="h-10 rounded-lg skeleton"></div>
+                            <div class="h-10 rounded-lg skeleton"></div>
+                            <div class="h-10 rounded-lg skeleton"></div>
+                        </div>
+
+                        <div id="productSelectionSection" class="hidden grid grid-cols-1 gap-4">
+                            <label class="text-sm font-semibold text-gray-700 mt-2">Clique em (+) para adicionar 1
+                                unidade no carrinho.</label>
+
+                            <div id="productList"
+                                class="max-h-72 overflow-y-auto border border-gray-100 rounded-lg p-2 bg-white/60">
+                            </div>
+
+                            <div id="messageBox" class="mt-3 text-sm hidden p-3 rounded-lg"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-lg font-bold text-gray-800 flex items-center justify-between">
+                            <span>📦 Itens no Carrinho</span>
+                            <span id="cartCount" class="text-sm font-medium text-green-600">0 itens</span>
+                        </h2>
+
+                        <div id="cartContainer" class="mt-4 overflow-x-auto">
+                            <div id="noCartItems" class="text-center text-gray-500 py-4 text-sm">Nenhum item no
+                                carrinho.</div>
+                        </div>
+
+                        <div id="cartSummary" class="mt-4 pt-4 border-t border-gray-100 hidden">
+                            <div class="flex justify-between font-semibold text-gray-700 mb-2">
+                                <span class="text-sm">Total de Produtos Diferentes:</span>
+                                <span id="cartTotalItems" class="text-green-700">0</span>
+                            </div>
+
+                            <div class="flex justify-between font-bold text-gray-800 mb-4">
+                                <span class="text-base">TOTAL GERAL (Qtd/Peso):</span>
+                                <span id="cartTotalQuantity" class="text-xl text-primary">0,00</span>
+                            </div>
+
+                            <button id="generateCartPDFBtn" type="button"
+                                class="mt-4 w-full px-4 py-3 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold shadow hover:scale-[1.01] transition">
+                                📄 Gerar PDF
+                            </button>
+
+                            <button id="sendWhatsAppBtn" type="button"
+                                class="mt-4 w-full px-4 py-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white font-semibold shadow hover:scale-[1.01] transition flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.483 8.411-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.308 1.658zm6.25-3.358l.369.214c1.274.759 2.74 1.16 4.247 1.162 4.895 0 8.879-3.984 8.882-8.88.001-2.37-.924-4.599-2.607-6.284-1.681-1.684-3.912-2.61-6.286-2.611-4.896 0-8.881 3.984-8.883 8.881 0 1.597.414 3.153 1.202 4.532l.233.408-1.033 3.774 3.876-1.017zm10.967-6.417c-.312-.156-1.848-.912-2.134-1.017-.286-.105-.494-.156-.702.156-.208.312-.806 1.017-.988 1.222-.182.205-.364.231-.676.075-.312-.156-1.316-.484-2.507-1.547-.927-.827-1.552-1.849-1.734-2.16-.182-.312-.019-.481.137-.635.141-.139.312-.364.468-.546.156-.182.208-.312.312-.52.104-.208.052-.39-.026-.546-.078-.156-.702-1.691-.962-2.314-.253-.607-.51-.525-.702-.535-.182-.008-.39-.01-.598-.01-.208 0-.546.078-.832.39-.286.312-1.092 1.067-1.092 2.6s1.118 3.015 1.274 3.223c.156.208 2.2 3.358 5.328 4.704.744.321 1.325.512 1.777.656.748.237 1.43.203 1.969.123.6-.089 1.848-.755 2.108-1.483.26-.728.26-1.353.182-1.483-.078-.131-.286-.208-.598-.364z" />
+                                </svg>
+                                Enviar via WhatsApp
+                            </button>
+
+
+                            <button id="clearCartBtn" type="button"
+                                class="mt-2 w-full px-4 py-2 rounded-xl bg-red-100 text-red-600 font-medium hover:bg-red-200 transition">
+                                Limpar Carrinho
+                            </button>
+                        </div>
+                    </div>
+
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <div id="pdfContent" class="hidden p-6 max-w-3xl mx-auto glass">
+        <h1 class="text-xl font-bold text-center text-primary">Pedido GLGA - Ivo Pita Indústria</h1>
+        <p id="reportDate" class="text-center text-sm text-gray-600 mb-4"></p>
+        <p class="text-center text-xs text-gray-500 mb-6">PDF gerado diretamente do carrinho de pedidos.</p>
+        <table class="w-full text-sm border-collapse">
+            <thead class="bg-green-600 text-white">
+                <tr>
+                    <th class="p-2 border">Descrição</th>
+                    <th class="p-2 border text-center">Quantidade</th>
+                    <th class="p-2 border">Tipo</th>
+                </tr>
+            </thead>
+            <tbody id="pdfTableBody"></tbody>
+        </table>
+    </div>
+
+    <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+<script>
+   // ---------- CONFIG & ELEMENTS ----------
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsAXctMIiQ3wewGMWRTpX-JhfMRCXoWS-ek_8SpSsmFK1htwT-ZWDOnQ-SX3b5eIuD-g/exec';
+const CART_STORAGE_KEY = 'glga_ivo_cart_items';
+
+const orderDate = document.getElementById('orderDate');
+const messageBox = document.getElementById('messageBox');
+const formSkeleton = document.getElementById('formSkeleton');
+const productSelectionSection = document.getElementById('productSelectionSection');
+const productListEl = document.getElementById('productList');
+const cartContainer = document.getElementById('cartContainer');
+const noCartItems = document.getElementById('noCartItems');
+const cartCount = document.getElementById('cartCount');
+const cartSummary = document.getElementById('cartSummary');
+const cartTotalItems = document.getElementById('cartTotalItems');
+const cartTotalQuantity = document.getElementById('cartTotalQuantity');
+const generateCartPDFBtn = document.getElementById('generateCartPDFBtn');
+const sendWhatsAppBtn = document.getElementById('sendWhatsAppBtn'); // Elemento do WhatsApp
+const clearCartBtn = document.getElementById('clearCartBtn');
+const pdfContent = document.getElementById('pdfContent');
+const pdfTableBody = document.getElementById('pdfTableBody');
+const reportDate = document.getElementById('reportDate');
+
+let products = [];
+let cart = loadCart();
+
+orderDate.value = new Date().toISOString().split('T')[0];
+
+// --- Theme Toggling ---
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const bodyEl = document.body;
+
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        bodyEl.classList.add('dark');
+        document.documentElement.style.setProperty('--glass-bg', 'rgba(17,24,39,0.55)');
+        document.documentElement.style.setProperty('--glass-border', 'rgba(255,255,255,0.06)');
+        themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+    } else {
+        bodyEl.classList.remove('dark');
+        document.documentElement.style.setProperty('--glass-bg', 'rgba(255,255,255,0.7)');
+        document.documentElement.style.setProperty('--glass-border', 'rgba(255,255,255,0.5)');
+        themeIcon.innerHTML = '<path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z"/>';
+    }
+    localStorage.setItem('ui-theme', theme);
+}
+
+(function initTheme() {
+    const saved = localStorage.getItem('ui-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    applyTheme(saved);
+    themeToggle.addEventListener('click', () => {
+        const next = (localStorage.getItem('ui-theme') === 'dark') ? 'light' : 'dark';
+        applyTheme(next);
+    });
+})();
+
+// ---------- UTIL & STORAGE ----------
+function loadCart() {
+    try {
+        const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+        return savedCart ? JSON.parse(savedCart) : [];
+    } catch (e) { return []; }
+}
+
+function saveCart() {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+}
+
+function showMsg(text, type = 'success') {
+    messageBox.textContent = text;
+    messageBox.className = `mt-3 p-3 rounded-lg text-sm ${type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`;
+    messageBox.classList.remove('hidden');
+    setTimeout(() => messageBox.classList.add('hidden'), 3500);
+}
+
+function escapeHtml(s) { return String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;'); }
+function formatDate(iso) { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; }
+function formatNumberToLocal(num) { return (Number(num) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }); }
+
+// ---------- CART & PRODUCTS ----------
+function renderCart() {
+    cartContainer.innerHTML = '';
+    const validCart = cart.filter(item => item.quantity > 0);
+    const totalQuantity = validCart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+
+    cartCount.textContent = `${validCart.length} item(ns)`;
+    cartTotalItems.textContent = validCart.length;
+    cartTotalQuantity.textContent = formatNumberToLocal(totalQuantity);
+
+    if (!validCart.length) {
+        noCartItems.classList.remove('hidden');
+        cartSummary.classList.add('hidden');
+        return;
+    }
+
+    noCartItems.classList.add('hidden');
+    cartSummary.classList.remove('hidden');
+
+    const table = document.createElement('table');
+    table.className = 'min-w-full divide-y divide-gray-200 text-sm';
+    table.innerHTML = `<tbody class="divide-y divide-gray-200"></tbody>`;
+    const tbody = table.querySelector('tbody');
+
+    validCart.forEach((item) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="py-2">
+                <div class="font-bold">${escapeHtml(item.description)}</div>
+                <div class="text-xs text-gray-500">${item.type}</div>
+            </td>
+            <td class="py-2 text-right font-mono font-bold text-primary">${formatNumberToLocal(item.quantity)}</td>
+            <td class="py-2 text-right">
+                <button onclick="removeItem('${item.description}')" class="text-red-500 text-xs">Sair</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+    cartContainer.appendChild(table);
+}
+
+function removeItem(desc) {
+    cart = cart.filter(i => i.description !== desc);
+    saveCart();
+    renderCart();
+    updateProductIndicators();
+}
+
+function addToCart(desc, type, qty) {
+    const idx = cart.findIndex(i => i.description === desc);
+    if (idx > -1) cart[idx].quantity += qty;
+    else cart.push({ description: desc, type, quantity: qty });
+    saveCart();
+    renderCart();
+    updateProductIndicators();
+    showMsg('Adicionado!');
+}
+
+function updateProductIndicators() {
+    document.querySelectorAll('[id^="qtyIndicator-"]').forEach(el => {
+        const row = el.closest('.product-row');
+        const desc = row.querySelector('.add-to-cart-btn').dataset.desc;
+        const item = cart.find(i => i.description === desc);
+        const q = item ? item.quantity : 0;
+        el.textContent = formatNumberToLocal(q);
+        row.style.background = q > 0 ? '#f0fdf4' : '';
+    });
+}
+
+async function fetchProducts() {
+    try {
+        const res = await fetch(GOOGLE_SCRIPT_URL + "?action=getProducts");
+        const data = await res.json();
+        products = data.products;
+        populateProductList();
+    } catch (e) { showMsg('Erro ao carregar produtos', 'error'); }
+    finally { formSkeleton.classList.add('hidden'); productSelectionSection.classList.remove('hidden'); }
+}
+
+function populateProductList() {
+    productListEl.innerHTML = products.map((p, i) => `
+        <div class="product-row flex items-center justify-between p-3 border rounded-xl mb-2">
+            <div class="text-sm font-medium">${p.description}</div>
+            <div class="flex items-center gap-3">
+                <span id="qtyIndicator-${i}" class="text-xs font-bold text-gray-500">0,00</span>
+                <button class="add-to-cart-btn bg-green-500 text-white w-8 h-8 rounded-full" 
+                        data-desc="${p.description}" data-type="${p.type || ''}"
+                        onclick="addToCart('${p.description}', '${p.type || ''}', 1)">+</button>
+            </div>
+        </div>
+    `).join('');
+    updateProductIndicators();
+}
+
+// ---------- PDF & WHATSAPP ----------
+async function generatePDFFromCart() {
+    const validItems = cart.filter(i => i.quantity > 0);
+    if (!validItems.length) return showMsg('Carrinho vazio', 'error');
+
+    pdfTableBody.innerHTML = validItems.map(i => `
+        <tr>
+            <td style="border:1px solid #ddd; padding:8px">${i.description}</td>
+            <td style="border:1px solid #ddd; padding:8px; text-align:center">${formatNumberToLocal(i.quantity)}</td>
+            <td style="border:1px solid #ddd; padding:8px">${i.type}</td>
+        </tr>
+    `).join('');
+
+    reportDate.innerText = `Data: ${formatDate(orderDate.value)}`;
+    pdfContent.classList.remove('hidden');
+
+    const opt = { margin: 10, filename: 'pedido.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
+    
+    html2pdf().set(opt).from(pdfContent).save().then(() => {
+        pdfContent.classList.add('hidden');
+    });
+}
+
+function sendWhatsApp() {
+    const validItems = cart.filter(i => i.quantity > 0);
+    if (!validItems.length) return showMsg('Carrinho vazio', 'error');
+
+    let msg = `*PEDIDO GLGA - IVO PITA*%0A`;
+    msg += `Data: ${formatDate(orderDate.value)}%0A%0A`;
+    validItems.forEach(i => {
+        msg += `• *${i.description}*: ${formatNumberToLocal(i.quantity)} ${i.type}%0A`;
+    });
+    
+    window.open(`https://wa.me/?text=${msg}`, '_blank');
+}
+
+// Inicialização
+window.onload = fetchProducts;
+generateCartPDFBtn.onclick = generatePDFFromCart;
+sendWhatsAppBtn.onclick = sendWhatsApp;
+        // ---------- INITIALIZATION ----------
+        generateCartPDFBtn.addEventListener('click', generatePDFFromCart);
+        fetchProducts(); // Carrega produtos e renderiza o carrinho carregado
+    </script>
+
+
+</body>
+
+</html>      
