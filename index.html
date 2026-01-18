@@ -150,6 +150,17 @@
         }
       }
     </style>
+
+    <link rel="manifest" href="manifest.json" />
+
+    <link rel="apple-touch-icon" href="assets/logo_IvoPIta.png" />
+
+    <meta name="theme-color" content="#16a34a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
   </head>
 
   <body class="min-h-screen">
@@ -319,7 +330,10 @@
       </div>
     </main>
 
-    <div id="pdfContent" class="hidden p-6 max-w-3xl mx-auto bg-white text-black">
+    <div
+      id="pdfContent"
+      class="hidden p-6 max-w-3xl mx-auto bg-white text-black"
+    >
       <h1 class="text-xl font-bold text-center text-primary">
         Pedido GLGA - Ivo Pita Indústria
       </h1>
@@ -342,8 +356,8 @@
     <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
 
     <script>
-// ---------- CONFIG & ELEMENTS ----------
-// URL do Google Apps Script é mantida APENAS para buscar a lista de produtos.
+      // ---------- CONFIG & ELEMENTS ----------
+      // URL do Google Apps Script é mantida APENAS para buscar a lista de produtos.
       const GOOGLE_SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbzHzCiHTdfZMbQXOZzoDrWKxkzutGcaZ1j-gFEaeqmw1pm8geKI50zzYRdwwhASswsjWQ/exec";
       const CART_STORAGE_KEY = "glga_ivo_cart_items"; // Chave para localStorage
