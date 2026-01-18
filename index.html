@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pedido Ivo Pita — GLGA (Apenas Carrinho/PDF)</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { inter: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#16a34a', accent: '#10b981', softgreen: '#e8fbea' },
+                    boxShadow: { 'soft-lg': '0 10px 30px rgba(16,24,40,0.08)' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* (Estilos mantidos) */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --glass-bg-dark: rgba(17, 24, 39, 0.55);
+            --glass-border-dark: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: radial-gradient(circle at 10% 20%, #e9fff0, #d6f7e3 20%, #eafaf0 60%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px) saturate(120%);
+            -webkit-backdrop-filter: blur(12px) saturate(120%);
+            border: 1px solid var(--glass-border);
+        }
+
+        .glass-dark {
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(12px) saturate(120%);
+            -webkit-backdrop-filter: blur(12px) saturate(120%);
+            border: 1px solid var(--glass-border-dark);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                background: linear-gradient(180deg, #f6fff6, #f0f9ee);
+            }
+        }
+
+        .focus-ring:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(10, 185, 129, 0.12);
+            border-color: var(--tw-ring-color);
+        }
+
+        .product-row {
+            transition: background .12s, transform .12s, box-shadow .12s;
+        }
+
+        .product-row:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+        }
+
+        /* Estilo para inputs de quantidade (E-commerce look) */
+        .qty-input {
+            transition: background .12s, border-color .12s;
+            width: 50px;
+            text-align: center;
+            font-size: 0.875rem;
+            padding: 0.5rem 0.25rem;
+            height: 32px;
+            border: 1px solid #d1d5db;
+        }
+
+        .qty-error {
+            border-color: #dc2626 !important;
+            background: #fff5f5 !important;
+        }
+
+        .qty-btn-minus,
+        .qty-btn-plus {
+            border: 1px solid #d1d5db;
+        }
+
+        .qty-btn-minus {
+            border-right: none;
+        }
+
+        .qty-btn-plus {
+            border-left: none;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 25%, rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0.06) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <header id="mainHeader" class="fixed top-4 left-1/2 -translate-x-1/2 w-[min(797px,96%)] z-50">
+        <div class="glass rounded-3xl px-4 py-3 flex items-center justify-between shadow-soft-lg">
+
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white shadow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 3h18v4H3zM5 11h14v10H5z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-700 font-semibold">Ivo Pita - Pedido GLGA</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button id="themeToggle" title="Alternar tema" class="p-2 rounded-lg hover:bg-white/30 transition">
+                    <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-700"
+                        viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-28 pb-24 flex justify-center">
+        <div class="w-[min(800px,96%)]">
+            <div class="grid grid-cols-1 gap-6">
+
+                <section class="col-span-1 space-y-6">
+
+                    <div class="glass rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4">🛒 Selecionar Produtos</h2>
+
+                        <div class="mb-5">
+                            <label class="text-sm font-semibold text-gray-700">📅 Data/Referência do Pedido</label>
+                            <input id="orderDate" type="date"
+                                class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-200 focus-ring bg-white/70"
+                                required />
+                        </div>
+
+                        <div id="formSkeleton" class="space-y-3">
+                            <div class="h-10 rounded-lg skeleton"></div>
+                            <div class="h-10 rounded-lg skeleton"></div>
+                            <div class="h-10 rounded-lg skeleton"></div>
+                        </div>
+
+                        <div id="productSelectionSection" class="hidden grid grid-cols-1 gap-4">
+                            <label class="text-sm font-semibold text-gray-700 mt-2">Clique em (+) para adicionar 1
+                                unidade no carrinho.</label>
+
+                            <div id="productList"
+                                class="max-h-72 overflow-y-auto border border-gray-100 rounded-lg p-2 bg-white/60">
+                            </div>
+
+                            <div id="messageBox" class="mt-3 text-sm hidden p-3 rounded-lg"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-lg font-bold text-gray-800 flex items-center justify-between">
+                            <span>📦 Itens no Carrinho</span>
+                            <span id="cartCount" class="text-sm font-medium text-green-600">0 itens</span>
+                        </h2>
+
+                        <div id="cartContainer" class="mt-4 overflow-x-auto">
+                            <div id="noCartItems" class="text-center text-gray-500 py-4 text-sm">Nenhum item no
+                                carrinho.</div>
+                        </div>
+
+                        <div id="cartSummary" class="mt-4 pt-4 border-t border-gray-100 hidden">
+                            <div class="flex justify-between font-semibold text-gray-700 mb-2">
+                                <span class="text-sm">Total de Produtos Diferentes:</span>
+                                <span id="cartTotalItems" class="text-green-700">0</span>
+                            </div>
+
+                            <div class="flex justify-between font-bold text-gray-800 mb-4">
+                                <span class="text-base">TOTAL GERAL (Qtd/Peso):</span>
+                                <span id="cartTotalQuantity" class="text-xl text-primary">0,00</span>
+                            </div>
+
+                            <button id="generateCartPDFBtn" type="button"
+                                class="mt-4 w-full px-4 py-3 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold shadow hover:scale-[1.01] transition">
+                                📄 Gerar PDF
+                            </button>
+
+                            <button id="clearCartBtn" type="button"
+                                class="mt-2 w-full px-4 py-2 rounded-xl bg-red-100 text-red-600 font-medium hover:bg-red-200 transition">
+                                Limpar Carrinho
+                            </button>
+                        </div>
+                    </div>
+
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <div id="pdfContent" class="hidden p-6 max-w-3xl mx-auto glass">
+        <h1 class="text-xl font-bold text-center text-primary">Pedido GLGA - Ivo Pita Indústria</h1>
+        <p id="reportDate" class="text-center text-sm text-gray-600 mb-4"></p>
+        <p class="text-center text-xs text-gray-500 mb-6">PDF gerado diretamente do carrinho de pedidos.</p>
+        <table class="w-full text-sm border-collapse">
+            <thead class="bg-green-600 text-white">
+                <tr>
+                    <th class="p-2 border">Descrição</th>
+                    <th class="p-2 border text-center">Quantidade</th>
+                    <th class="p-2 border">Tipo</th>
+                </tr>
+            </thead>
+            <tbody id="pdfTableBody"></tbody>
+        </table>
+    </div>
+
+    <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js"></script>
+
+    <script>
+        // ---------- CONFIG & ELEMENTS ----------
+        // URL do Google Apps Script é mantida APENAS para buscar a lista de produtos.
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHzCiHTdfZMbQXOZzoDrWKxkzutGcaZ1j-gFEaeqmw1pm8geKI50zzYRdwwhASswsjWQ/exec';
+        const CART_STORAGE_KEY = 'glga_ivo_cart_items'; // Chave para localStorage
+
+        const orderDate = document.getElementById('orderDate');
+        const messageBox = document.getElementById('messageBox');
+        const formSkeleton = document.getElementById('formSkeleton');
+        const productSelectionSection = document.getElementById('productSelectionSection');
+        const productListEl = document.getElementById('productList');
+
+        const cartContainer = document.getElementById('cartContainer');
+        const noCartItems = document.getElementById('noCartItems');
+        const cartCount = document.getElementById('cartCount');
+        const cartSummary = document.getElementById('cartSummary');
+        const cartTotalItems = document.getElementById('cartTotalItems');
+        const cartTotalQuantity = document.getElementById('cartTotalQuantity');
+        const generateCartPDFBtn = document.getElementById('generateCartPDFBtn');
+        const clearCartBtn = document.getElementById('clearCartBtn');
+
+        // Elementos do PDF
+        const pdfContent = document.getElementById('pdfContent');
+        const pdfTableBody = document.getElementById('pdfTableBody');
+        const reportDate = document.getElementById('reportDate');
+
+        let products = []; // Lista de produtos disponíveis (API/Sheet)
+        let cart = loadCart(); // 👈 AGORA CARREGA DO LOCALSTORAGE AO INICIAR
+
+        // Define a data de hoje por padrão
+        orderDate.value = new Date().toISOString().split('T')[0];
+
+        // --- Theme Toggling (Mantido) ---
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const bodyEl = document.body;
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                bodyEl.classList.add('dark');
+                document.documentElement.style.setProperty('--glass-bg', 'rgba(17,24,39,0.55)');
+                document.documentElement.style.setProperty('--glass-border', 'rgba(255,255,255,0.06)');
+                themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+            } else {
+                bodyEl.classList.remove('dark');
+                document.documentElement.style.setProperty('--glass-bg', 'rgba(255,255,255,0.7)');
+                document.documentElement.style.setProperty('--glass-border', 'rgba(255,255,255,0.5)');
+                themeIcon.innerHTML = '<path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z"/>';
+            }
+            localStorage.setItem('ui-theme', theme);
+        }
+
+        (function initTheme() {
+            const saved = localStorage.getItem('ui-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(saved);
+            themeToggle.addEventListener('click', () => {
+                const next = (localStorage.getItem('ui-theme') === 'dark') ? 'light' : 'dark';
+                applyTheme(next);
+            });
+        })();
+
+        // ---------- UTIL & STORAGE LOGIC (Novo) ----------
+
+        /** Carrega o carrinho do localStorage ao iniciar a página. */
+        function loadCart() {
+            try {
+                const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+                return savedCart ? JSON.parse(savedCart) : [];
+            } catch (e) {
+                console.error("Erro ao carregar carrinho do localStorage:", e);
+                return []; // Retorna carrinho vazio se houver erro
+            }
+        }
+
+        /** Salva o estado atual do carrinho no localStorage. */
+        function saveCart() {
+            try {
+                localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+            } catch (e) {
+                console.error("Erro ao salvar carrinho no localStorage:", e);
+            }
+        }
+
+        function showMsg(text, type = 'success') {
+            messageBox.textContent = text;
+            messageBox.className = 'mt-3 p-3 rounded-lg text-sm';
+            if (type === 'success') { messageBox.classList.add('bg-green-50', 'text-green-700'); }
+            else if (type === 'error') { messageBox.classList.add('bg-red-50', 'text-red-700'); }
+            else { messageBox.classList.add('bg-yellow-50', 'text-yellow-700'); }
+            messageBox.classList.remove('hidden');
+            setTimeout(() => messageBox.classList.add('hidden'), 3500);
+        }
+
+        function escapeAttr(s) { return String(s || '').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }
+        function escapeHtml(s) { return String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;'); }
+        function formatDate(iso) { try { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; } catch { return iso; } }
+
+        function formatNumberToLocal(num) {
+            // Formata para 2 casas decimais e usa vírgula
+            return (Number(num) || 0).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function normalizeQuantityInput(value) {
+            // Converte vírgula para ponto e tenta analisar como float
+            const cleaned = String(value).replace(',', '.').trim();
+            const num = parseFloat(cleaned);
+            // Aceita 0, mas NaN ou negativo não
+            return (num >= 0 && !isNaN(num)) ? num : NaN;
+        }
+
+        // ---------- CART LOGIC ----------
+        function renderCart() {
+            cartContainer.innerHTML = '';
+            
+            // Filtra itens com quantidade > 0 para o cálculo e exibição
+            const validCart = cart.filter(item => item.quantity > 0);
+            
+            const totalQuantity = validCart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+            
+            cartCount.textContent = `${validCart.length} item(ns)`;
+            cartTotalItems.textContent = validCart.length;
+            cartTotalQuantity.textContent = formatNumberToLocal(totalQuantity);
+
+            if (!validCart.length) {
+                noCartItems.classList.remove('hidden');
+                cartSummary.classList.add('hidden');
+                saveCart(); // 👈 SALVA QUANDO VAZIO
+                return;
+            }
+
+            noCartItems.classList.add('hidden');
+            cartSummary.classList.remove('hidden');
+
+            // Cria a tabela de carrinho para exibição na tela
+            const table = document.createElement('table');
+            table.className = 'min-w-full divide-y divide-gray-200';
+            table.innerHTML = `
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/2">Produto</th>
+                        <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Quantidade</th>
+                        <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Ação</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200"></tbody>
+            `;
+            const tbody = table.querySelector('tbody');
+
+            validCart.forEach((item, index) => {
+                // Encontra o index no array original 'cart' (antes do filtro)
+                // Isto é crucial, pois precisamos do índice no array 'cart' completo para modificar/remover
+                const originalIndex = cart.findIndex(c => c.description === item.description);
+                
+                const tr = document.createElement('tr');
+                tr.className = 'cart-item bg-white';
+
+                const errorClass = (item.quantity <= 0) ? 'qty-error' : '';
+
+                tr.innerHTML = `
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${escapeHtml(item.description)}</div>
+                        <div class="text-xs text-gray-500">${item.type ? escapeHtml(item.type) : ''}</div>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-center">
+                        <div class="flex items-center justify-center">
+                            <button class="qty-btn-minus p-1 bg-red-50 text-red-600 rounded-l hover:bg-red-100 transition w-7 h-7 flex items-center justify-center text-base leading-none" data-index="${originalIndex}">-</button>
+                            <input type="text" value="${formatNumberToLocal(item.quantity)}" 
+                                class="qty-input border border-gray-300 focus-ring ${errorClass}"
+                                data-index="${originalIndex}"
+                                inputmode="decimal" />
+                            <button class="qty-btn-plus p-1 bg-green-50 text-green-600 rounded-r hover:bg-green-100 transition w-7 h-7 flex items-center justify-center text-base leading-none" data-index="${originalIndex}">+</button>
+                        </div>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right">
+                        <button class="remove-cart-btn text-red-600 hover:text-red-900 text-sm" data-index="${originalIndex}">
+                            Remover
+                        </button>
+                    </td>
+                `;
+
+                const qtyInput = tr.querySelector('.qty-input');
+                const btnMinus = tr.querySelector('.qty-btn-minus');
+                const btnPlus = tr.querySelector('.qty-btn-plus');
+                const btnRemove = tr.querySelector('.remove-cart-btn');
+
+                const updateCartAndIndicators = () => {
+                    // Remove itens com 0 ou menos
+                    cart = cart.filter(item => item.quantity > 0);
+                    cart.sort((a, b) => a.description.localeCompare(b.description));
+                    renderCart();
+                    updateProductIndicators();
+                    saveCart(); // 👈 SALVA APÓS ATUALIZAÇÃO
+                };
+
+                btnPlus.addEventListener('click', () => { cart[originalIndex].quantity += 1; updateCartAndIndicators(); });
+                btnMinus.addEventListener('click', () => {
+                    cart[originalIndex].quantity = Math.max(0, cart[originalIndex].quantity - 1);
+                    updateCartAndIndicators();
+                });
+
+                qtyInput.addEventListener('input', (e) => {
+                    const normalizedQty = normalizeQuantityInput(e.target.value);
+                    if (isNaN(normalizedQty) || normalizedQty < 0) { qtyInput.classList.add('qty-error'); }
+                    else { qtyInput.classList.remove('qty-error'); cart[originalIndex].quantity = normalizedQty; }
+                    // Não salva aqui, espera o 'blur' para salvar o valor final
+                });
+
+                qtyInput.addEventListener('blur', (e) => {
+                    const normalizedQty = normalizeQuantityInput(e.target.value);
+                    if (isNaN(normalizedQty) || normalizedQty <= 0) {
+                        // Se for inválido ou zero, remove o item
+                        cart.splice(originalIndex, 1);
+                    } else {
+                        e.target.value = formatNumberToLocal(normalizedQty);
+                        cart[originalIndex].quantity = normalizedQty;
+                    }
+                    updateCartAndIndicators();
+                });
+
+                btnRemove.addEventListener('click', () => { cart.splice(originalIndex, 1); updateCartAndIndicators(); });
+
+                tbody.appendChild(tr);
+            });
+
+            cartContainer.appendChild(table);
+            saveCart(); // 👈 SALVA APÓS RENDERIZAÇÃO COMPLETA
+        }
+
+        function addToCart(desc, type, qty = 1) {
+            const index = cart.findIndex(item => item.description === desc);
+            if (index !== -1) {
+                cart[index].quantity = (cart[index].quantity || 0) + qty;
+                showMsg(`Adicionado +${formatNumberToLocal(qty)} de ${desc}.`, 'info');
+            } else {
+                cart.push({ description: desc, type: type || '', quantity: qty });
+                showMsg(`${desc} adicionado ao carrinho.`, 'success');
+            }
+            // Garante que o item com quantidade > 0 permanece e ordena
+            cart = cart.filter(item => item.quantity > 0);
+            cart.sort((a, b) => a.description.localeCompare(b.description));
+            renderCart();
+            updateProductIndicators();
+            saveCart(); // 👈 SALVA APÓS ADIÇÃO
+        }
+
+        function updateProductIndicators() {
+            document.querySelectorAll('#productList .product-row').forEach(row => {
+                const productEl = row.querySelector('.add-to-cart-btn');
+                if (!productEl) return;
+                const desc = productEl.dataset.desc;
+                const cartItem = cart.find(item => item.description === desc);
+                const indicator = row.querySelector(`#qtyIndicator-${row.dataset.index}`);
+
+                if (indicator) {
+                    const qty = cartItem ? cartItem.quantity : 0;
+                    indicator.textContent = formatNumberToLocal(qty);
+                    indicator.classList.toggle('text-green-700', qty > 0);
+                    indicator.classList.toggle('text-gray-500', qty === 0);
+                    row.classList.toggle('border-green-300', qty > 0);
+                    row.classList.toggle('bg-green-50', qty > 0);
+                    row.classList.toggle('bg-white/70', qty === 0);
+                }
+            });
+        }
+
+        // Evento para limpar o carrinho
+        clearCartBtn.addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+                cart = [];
+                localStorage.removeItem(CART_STORAGE_KEY); // 👈 REMOVE DO LOCALSTORAGE
+                renderCart();
+                updateProductIndicators();
+                showMsg('Carrinho limpo.', 'info');
+            }
+        });
+
+        // ---------- PRODUCT LIST RENDER & LOGIC ----------
+        function populateProductList() {
+            productListEl.innerHTML = '';
+
+            if (!products || products.length === 0) {
+                productListEl.innerHTML = '<div class="text-sm text-gray-500 p-2">Nenhum produto disponível para seleção.</div>';
+                return;
+            }
+
+            products.forEach((p, index) => {
+                const row = document.createElement('div');
+                const cartItem = cart.find(item => item.description === p.description);
+                const currentQty = cartItem ? formatNumberToLocal(cartItem.quantity) : '0,00';
+                const isSelectedClass = cartItem ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-white/70';
+
+                row.className = `product-row flex items-center justify-between gap-3 p-3 rounded-xl border mb-2 cursor-pointer ${isSelectedClass}`;
+                row.dataset.index = index;
+
+                row.innerHTML = `
+                    <div class="flex-1">
+                        <div class="font-medium text-sm">${escapeHtml(p.description)}</div>
+                        <div class="text-xs text-gray-500">${p.type ? 'Tipo: ' + escapeHtml(p.type) : ''}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="qtyIndicator-${index}" class="text-xs font-bold w-12 text-right ${cartItem ? 'text-green-700' : 'text-gray-500'}">${currentQty}</span>
+                        
+                        <button class="add-to-cart-btn p-2 rounded-full bg-green-500 text-white hover:bg-green-600 transition w-8 h-8 flex items-center justify-center text-lg leading-none" 
+                            data-desc="${escapeAttr(p.description)}"
+                            data-type="${escapeAttr(p.type || '')}"
+                            title="Adicionar 1 unidade">
+                            +
+                        </button>
+                    </div>
+                `;
+
+                row.querySelector('.add-to-cart-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const desc = e.currentTarget.dataset.desc;
+                    const type = e.currentTarget.dataset.type;
+                    addToCart(desc, type, 1);
+                });
+
+                productListEl.appendChild(row);
+            });
+        }
+
+        // ---------- FETCH PRODUCTS (Apenas para obter a lista) ----------
+        async function fetchProducts() {
+            formSkeleton.classList.remove('hidden');
+            productSelectionSection.classList.add('hidden');
+            productListEl.innerHTML = '<div class="text-sm text-gray-500 p-2">Carregando produtos...</div>';
+
+            try {
+                const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProducts&t=${Date.now()}`);
+                if (!res.ok) { throw new Error(`Erro de rede: ${res.status} ${res.statusText}`); }
+
+                const data = await res.json();
+
+                if (data?.status === 'success' && Array.isArray(data.products)) {
+                    products = data.products;
+                } else {
+                    throw new Error(data?.message || 'Resposta do Sheets inválida ou vazia.');
+                }
+            } catch (err) {
+                console.error('Erro fatal ao buscar produtos:', err);
+                products = [];
+                productListEl.innerHTML = `<div class="text-sm text-red-600 p-2">❌ Erro ao carregar: ${err.message || 'Verifique a URL do Google Sheets.'}</div>`;
+            } finally {
+                formSkeleton.classList.add('hidden');
+                productSelectionSection.classList.remove('hidden');
+                populateProductList();
+                renderCart(); // Garante a renderização do carrinho carregado
+            }
+        }
+
+
+        // ---------- FUNÇÃO DE GERAÇÃO DE PDF (Foco principal) ----------
+        function generatePDFFromCart() {
+            // Filtra itens com quantidade > 0
+            const itemsToPrint = cart.filter(item => item.quantity > 0);
+
+            if (!itemsToPrint.length) {
+                showMsg('O carrinho está vazio. Adicione itens para gerar o PDF.', 'error');
+                return;
+            }
+
+            pdfTableBody.innerHTML = '';
+
+            // Obtém totais
+            const totalItens = itemsToPrint.length;
+            const totalQuantidade = itemsToPrint.reduce((sum, o) => sum + (o.quantity || 0), 0);
+
+            // Data do Pedido (do campo de input)
+            const orderDateValue = orderDate.value;
+            const formattedDate = orderDateValue ? formatDate(orderDateValue) : new Date().toLocaleDateString('pt-BR');
+
+            // MONTAR A TABELA DO PDF (Ordem: Descrição | Quantidade | Tipo)
+            itemsToPrint.forEach(o => {
+                const formattedQuantity = formatNumberToLocal(o.quantity);
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-softgreen';
+                tr.innerHTML = `
+                    <td class="p-2 border">${escapeHtml(o.description)}</td>
+                    <td class="p-2 border text-center font-semibold">${formattedQuantity}</td>
+                    <td class="p-2 border">${escapeHtml(o.type)}</td>
+                `;
+                pdfTableBody.appendChild(tr);
+            });
+
+            // LINHA DOS TOTAIS
+            const totalItensRow = document.createElement('tr');
+            totalItensRow.innerHTML = `
+                <td colspan="3" class="p-2 border font-bold bg-gray-50 text-gray-700 text-sm">
+                    Total de Produtos Diferentes: ${totalItens}
+                </td>
+            `;
+            pdfTableBody.appendChild(totalItensRow);
+
+            // LINHA TOTAL DE QUANTIDADE
+            const totalQuantidadeRow = document.createElement('tr');
+            totalQuantidadeRow.innerHTML = `
+                <td colspan="3" class="p-2 border font-bold bg-green-100 text-green-800 text-lg">
+                    TOTAL GERAL: ${formatNumberToLocal(totalQuantidade)}
+                </td>
+            `;
+            pdfTableBody.appendChild(totalQuantidadeRow);
+
+            // DATA DO RELATÓRIO
+            reportDate.textContent = `Data/Referência do Pedido: ${formattedDate}`;
+
+            const options = {
+                margin: [10, 10, 10, 10],
+                filename: `Pedido_GLGA_${orderDateValue || new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, logging: false, dpi: 192, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            generateCartPDFBtn.disabled = true;
+            generateCartPDFBtn.textContent = 'Gerando...';
+            pdfContent.classList.remove('hidden');
+
+            // Inicia a geração do PDF
+            html2pdf().from(pdfContent).set(options).save().then(() => {
+                pdfContent.classList.add('hidden');
+                generateCartPDFBtn.disabled = false;
+                generateCartPDFBtn.textContent = '📄 Gerar PDF do Carrinho';
+                showMsg('PDF do carrinho gerado com sucesso. O carrinho permanece inalterado.', 'success');
+            }).catch(e => {
+                console.error("Erro ao gerar PDF:", e);
+                generateCartPDFBtn.disabled = false;
+                generateCartPDFBtn.textContent = '📄 Gerar PDF do Carrinho';
+                pdfContent.classList.add('hidden');
+                showMsg('Erro ao gerar o PDF. Verifique o console.', 'error');
+            });
+        }
+
+
+        // ---------- INITIALIZATION ----------
+        generateCartPDFBtn.addEventListener('click', generatePDFFromCart);
+        fetchProducts(); // Carrega produtos e renderiza o carrinho carregado
+    </script>
+</body>
+
+</html>
+
