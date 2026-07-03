@@ -31,7 +31,6 @@
     </script>
 
     <style>
-      /* (Estilos mantidos) */
       :root {
         --glass-bg: rgba(255, 255, 255, 0.7);
         --glass-border: rgba(255, 255, 255, 0.5);
@@ -98,7 +97,6 @@
           0 1px 2px -1px rgb(0 0 0 / 0.05);
       }
 
-      /* Estilo para inputs de quantidade (E-commerce look) */
       .qty-input {
         transition:
           background 0.12s,
@@ -149,12 +147,15 @@
           background-position: -200% 0;
         }
       }
+
+      .price-empty {
+        color: #9ca3af;
+        font-style: italic;
+      }
     </style>
 
     <link rel="manifest" href="manifest.json" />
-
     <link rel="apple-touch-icon" href="assets/logo_IvoPIta.png" />
-
     <meta name="theme-color" content="#16a34a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta
@@ -204,10 +205,6 @@
             </button>
           </div>
         </div>
-
-        <!-- <div class="hidden sm:block">
-      <span class="text-[10px] uppercase tracking-widest text-gray-400">Oficial</span>
-    </div> -->
       </div>
     </header>
 
@@ -288,10 +285,17 @@
                   <span id="cartTotalItems" class="text-green-700">0</span>
                 </div>
 
-                <div class="flex justify-between font-bold text-gray-800 mb-4">
-                  <span class="text-base">TOTAL GERAL (Qtd/Peso):</span>
+                <div class="flex justify-between font-bold text-gray-800 mb-2">
+                  <span class="text-base">Total Geral (Qtd/Peso):</span>
                   <span id="cartTotalQuantity" class="text-xl text-primary"
                     >0,00</span
+                  >
+                </div>
+
+                <div class="flex justify-between font-bold text-gray-800 mb-4">
+                  <span class="text-base">Valor Total:</span>
+                  <span id="cartTotalValue" class="text-xl text-primary"
+                    >R$ 0,00</span
                   >
                 </div>
 
@@ -338,14 +342,14 @@
         Pedido GLGA - Ivo Pita Indústria
       </h1>
       <p id="reportDate" class="text-center text-sm text-gray-600 mb-4"></p>
-      <p class="text-center text-xs text-gray-500 mb-6">
-        <!-- PDF gerado diretamente do carrinho de pedidos. -->
-      </p>
+      <p class="text-center text-xs text-gray-500 mb-6"></p>
       <table class="w-full text-sm border-collapse">
         <thead class="bg-green-600 text-white">
           <tr>
             <th class="p-2 border">Descrição</th>
             <th class="p-2 border text-center">Quantidade</th>
+            <th class="p-2 border text-center">Preço Unit.</th>
+            <th class="p-2 border text-center">Subtotal</th>
             <th class="p-2 border">Tipo</th>
           </tr>
         </thead>
@@ -357,10 +361,10 @@
 
     <script>
       // ---------- CONFIG & ELEMENTS ----------
-      // URL do Google Apps Script é mantida APENAS para buscar a lista de produtos.
-      const GOOGLE_SCRIPT_URL =
-        "https://script.google.com/macros/s/AKfycbzHzCiHTdfZMbQXOZzoDrWKxkzutGcaZ1j-gFEaeqmw1pm8geKI50zzYRdwwhASswsjWQ/exec";
-      const CART_STORAGE_KEY = "glga_ivo_cart_items"; // Chave para localStorage
+      // ⚠️ ATUALIZE ESTA URL COM A NOVA URL DO SEU APPS SCRIPT ⚠️
+    const GOOGLE_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbwsAXctMIiQ3wewGMWRTpX-JhfMRCXoWS-ek_8SpSsmFK1htwT-ZWDOnQ-SX3b5eIuD-g/exec";
+      const CART_STORAGE_KEY = "glga_ivo_cart_items";
 
       const orderDate = document.getElementById("orderDate");
       const messageBox = document.getElementById("messageBox");
@@ -376,21 +380,20 @@
       const cartSummary = document.getElementById("cartSummary");
       const cartTotalItems = document.getElementById("cartTotalItems");
       const cartTotalQuantity = document.getElementById("cartTotalQuantity");
+      const cartTotalValue = document.getElementById("cartTotalValue");
       const generateCartPDFBtn = document.getElementById("generateCartPDFBtn");
       const clearCartBtn = document.getElementById("clearCartBtn");
 
-      // Elementos do PDF
       const pdfContent = document.getElementById("pdfContent");
       const pdfTableBody = document.getElementById("pdfTableBody");
       const reportDate = document.getElementById("reportDate");
 
-      let products = []; // Lista de produtos disponíveis (API/Sheet)
-      let cart = loadCart(); // 👈 AGORA CARREGA DO LOCALSTORAGE AO INICIAR
+      let products = [];
+      let cart = loadCart();
 
-      // Define a data de hoje por padrão
       orderDate.value = new Date().toISOString().split("T")[0];
 
-      // --- Theme Toggling (Mantido) ---
+      // --- Theme Toggling ---
       const themeToggle = document.getElementById("themeToggle");
       const themeIcon = document.getElementById("themeIcon");
       const bodyEl = document.body;
@@ -438,20 +441,17 @@
         });
       })();
 
-      // ---------- UTIL & STORAGE LOGIC (Novo) ----------
-
-      /** Carrega o carrinho do localStorage ao iniciar a página. */
+      // ---------- UTIL & STORAGE LOGIC ----------
       function loadCart() {
         try {
           const savedCart = localStorage.getItem(CART_STORAGE_KEY);
           return savedCart ? JSON.parse(savedCart) : [];
         } catch (e) {
           console.error("Erro ao carregar carrinho do localStorage:", e);
-          return []; // Retorna carrinho vazio se houver erro
+          return [];
         }
       }
 
-      /** Salva o estado atual do carrinho no localStorage. */
       function saveCart() {
         try {
           localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
@@ -495,18 +495,35 @@
       }
 
       function formatNumberToLocal(num) {
-        // Formata para 2 casas decimais e usa vírgula
         return (Number(num) || 0).toLocaleString("pt-BR", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         });
       }
 
+      // Função para converter preço com vírgula para número
+      function parsePrice(priceStr) {
+        if (!priceStr || priceStr === "" || priceStr === null || priceStr === undefined) {
+          return 0;
+        }
+        
+        // Converte para string e remove caracteres especiais
+        let cleaned = String(priceStr)
+          .replace(/R\$/g, "") // Remove R$
+          .replace(/\./g, "") // Remove pontos de milhar
+          .replace(/\s/g, "") // Remove espaços
+          .trim();
+        
+        // Substitui vírgula por ponto (separador decimal)
+        cleaned = cleaned.replace(",", ".");
+        
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? 0 : num;
+      }
+
       function normalizeQuantityInput(value) {
-        // Converte vírgula para ponto e tenta analisar como float
         const cleaned = String(value).replace(",", ".").trim();
         const num = parseFloat(cleaned);
-        // Aceita 0, mas NaN ou negativo não
         return num >= 0 && !isNaN(num) ? num : NaN;
       }
 
@@ -514,7 +531,6 @@
       function renderCart() {
         cartContainer.innerHTML = "";
 
-        // Filtra itens com quantidade > 0 para o cálculo e exibição
         const validCart = cart.filter((item) => item.quantity > 0);
 
         const totalQuantity = validCart.reduce(
@@ -522,29 +538,35 @@
           0,
         );
 
+        const totalValue = validCart.reduce(
+          (sum, item) => sum + ((item.quantity || 0) * (item.price || 0)),
+          0,
+        );
+
         cartCount.textContent = `${validCart.length} item(ns)`;
         cartTotalItems.textContent = validCart.length;
         cartTotalQuantity.textContent = formatNumberToLocal(totalQuantity);
+        cartTotalValue.textContent = `R$ ${formatNumberToLocal(totalValue)}`;
 
         if (!validCart.length) {
           noCartItems.classList.remove("hidden");
           cartSummary.classList.add("hidden");
-          saveCart(); // 👈 SALVA QUANDO VAZIO
+          saveCart();
           return;
         }
 
         noCartItems.classList.add("hidden");
         cartSummary.classList.remove("hidden");
 
-        // Cria a tabela de carrinho para exibição na tela
         const table = document.createElement("table");
         table.className = "min-w-full divide-y divide-gray-200";
         table.innerHTML = `
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/2">Produto</th>
-                        <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Quantidade</th>
-                        <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Ação</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">Produto</th>
+                        <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Preço</th>
+                        <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Quantidade</th>
+                        <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">Ação</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200"></tbody>
@@ -552,8 +574,6 @@
         const tbody = table.querySelector("tbody");
 
         validCart.forEach((item, index) => {
-          // Encontra o index no array original 'cart' (antes do filtro)
-          // Isto é crucial, pois precisamos do índice no array 'cart' completo para modificar/remover
           const originalIndex = cart.findIndex(
             (c) => c.description === item.description,
           );
@@ -562,11 +582,19 @@
           tr.className = "cart-item bg-white";
 
           const errorClass = item.quantity <= 0 ? "qty-error" : "";
+          const subtotal = (item.quantity || 0) * (item.price || 0);
 
           tr.innerHTML = `
                     <td class="px-3 py-2 whitespace-nowrap">
                         <div class="text-sm font-medium text-gray-900">${escapeHtml(item.description)}</div>
                         <div class="text-xs text-gray-500">${item.type ? escapeHtml(item.type) : ""}</div>
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-center">
+                        ${item.price > 0 ? 
+                            `<div class="text-sm font-medium text-gray-700">R$ ${formatNumberToLocal(item.price)}</div>
+                             <div class="text-xs text-gray-400">Sub: R$ ${formatNumberToLocal(subtotal)}</div>` :
+                            `<div class="text-xs text-gray-400">Sem preço</div>`
+                        }
                     </td>
                     <td class="px-3 py-2 whitespace-nowrap text-center">
                         <div class="flex items-center justify-center">
@@ -591,12 +619,11 @@
           const btnRemove = tr.querySelector(".remove-cart-btn");
 
           const updateCartAndIndicators = () => {
-            // Remove itens com 0 ou menos
             cart = cart.filter((item) => item.quantity > 0);
             cart.sort((a, b) => a.description.localeCompare(b.description));
             renderCart();
             updateProductIndicators();
-            saveCart(); // 👈 SALVA APÓS ATUALIZAÇÃO
+            saveCart();
           };
 
           btnPlus.addEventListener("click", () => {
@@ -619,13 +646,11 @@
               qtyInput.classList.remove("qty-error");
               cart[originalIndex].quantity = normalizedQty;
             }
-            // Não salva aqui, espera o 'blur' para salvar o valor final
           });
 
           qtyInput.addEventListener("blur", (e) => {
             const normalizedQty = normalizeQuantityInput(e.target.value);
             if (isNaN(normalizedQty) || normalizedQty <= 0) {
-              // Se for inválido ou zero, remove o item
               cart.splice(originalIndex, 1);
             } else {
               e.target.value = formatNumberToLocal(normalizedQty);
@@ -643,27 +668,32 @@
         });
 
         cartContainer.appendChild(table);
-        saveCart(); // 👈 SALVA APÓS RENDERIZAÇÃO COMPLETA
+        saveCart();
       }
 
-      function addToCart(desc, type, qty = 1) {
+      function addToCart(desc, type, price, qty = 1) {
         const index = cart.findIndex((item) => item.description === desc);
         if (index !== -1) {
           cart[index].quantity = (cart[index].quantity || 0) + qty;
+          if (price !== undefined) cart[index].price = price;
           showMsg(
             `Adicionado +${formatNumberToLocal(qty)} de ${desc}.`,
             "info",
           );
         } else {
-          cart.push({ description: desc, type: type || "", quantity: qty });
+          cart.push({
+            description: desc,
+            type: type || "",
+            quantity: qty,
+            price: price || 0,
+          });
           showMsg(`${desc} adicionado ao carrinho.`, "success");
         }
-        // Garante que o item com quantidade > 0 permanece e ordena
         cart = cart.filter((item) => item.quantity > 0);
         cart.sort((a, b) => a.description.localeCompare(b.description));
         renderCart();
         updateProductIndicators();
-        saveCart(); // 👈 SALVA APÓS ADIÇÃO
+        saveCart();
       }
 
       function updateProductIndicators() {
@@ -690,18 +720,17 @@
           });
       }
 
-      // Evento para limpar o carrinho
       clearCartBtn.addEventListener("click", () => {
         if (confirm("Tem certeza que deseja limpar todo o carrinho?")) {
           cart = [];
-          localStorage.removeItem(CART_STORAGE_KEY); // 👈 REMOVE DO LOCALSTORAGE
+          localStorage.removeItem(CART_STORAGE_KEY);
           renderCart();
           updateProductIndicators();
           showMsg("Carrinho limpo.", "info");
         }
       });
 
-      // ---------- PRODUCT LIST RENDER & LOGIC ----------
+      // ---------- PRODUCT LIST RENDER ----------
       function populateProductList() {
         productListEl.innerHTML = "";
 
@@ -726,10 +755,16 @@
           row.className = `product-row flex items-center justify-between gap-3 p-3 rounded-xl border mb-2 cursor-pointer ${isSelectedClass}`;
           row.dataset.index = index;
 
+          const hasPrice = p.price > 0;
+          const priceDisplay = hasPrice 
+            ? `<div class="text-xs text-green-600 font-semibold">R$ ${formatNumberToLocal(p.price)}</div>`
+            : `<div class="text-xs text-gray-400 italic">Sem preço cadastrado</div>`;
+
           row.innerHTML = `
                     <div class="flex-1">
                         <div class="font-medium text-sm">${escapeHtml(p.description)}</div>
                         <div class="text-xs text-gray-500">${p.type ? "Tipo: " + escapeHtml(p.type) : ""}</div>
+                        ${priceDisplay}
                     </div>
                     <div class="flex items-center gap-2">
                         <span id="qtyIndicator-${index}" class="text-xs font-bold w-12 text-right ${cartItem ? "text-green-700" : "text-gray-500"}">${currentQty}</span>
@@ -737,6 +772,7 @@
                         <button class="add-to-cart-btn p-2 rounded-full bg-green-500 text-white hover:bg-green-600 transition w-8 h-8 flex items-center justify-center text-lg leading-none" 
                             data-desc="${escapeAttr(p.description)}"
                             data-type="${escapeAttr(p.type || "")}"
+                            data-price="${p.price || 0}"
                             title="Adicionar 1 unidade">
                             +
                         </button>
@@ -749,14 +785,15 @@
               e.stopPropagation();
               const desc = e.currentTarget.dataset.desc;
               const type = e.currentTarget.dataset.type;
-              addToCart(desc, type, 1);
+              const price = parseFloat(e.currentTarget.dataset.price) || 0;
+              addToCart(desc, type, price, 1);
             });
 
           productListEl.appendChild(row);
         });
       }
 
-      // ---------- FETCH PRODUCTS (Apenas para obter a lista) ----------
+      // ---------- FETCH PRODUCTS ----------
       async function fetchProducts() {
         formSkeleton.classList.remove("hidden");
         productSelectionSection.classList.add("hidden");
@@ -765,19 +802,55 @@
 
         try {
           const res = await fetch(
-            `${GOOGLE_SCRIPT_URL}?action=getProducts&t=${Date.now()}`,
+            `${GOOGLE_SCRIPT_URL}?action=getProducts&t=${Date.now()}`
           );
           if (!res.ok) {
             throw new Error(`Erro de rede: ${res.status} ${res.statusText}`);
           }
 
           const data = await res.json();
+          
+          // 🔍 LOG PARA DEBUG - Veja no console do navegador
+          console.log("Dados recebidos da API:", data);
+          console.log("Estrutura dos produtos:", data?.products);
 
           if (data?.status === "success" && Array.isArray(data.products)) {
-            products = data.products;
+            // Mapeia os produtos com base na estrutura real dos dados
+            products = data.products.map((p) => {
+              // Se for um array (linha da planilha)
+              if (Array.isArray(p)) {
+                console.log("Produto como array:", p);
+                return {
+                  description: p[0] || "",
+                  price: parsePrice(p[1] || ""),
+                  type: p[2] || "",
+                };
+              }
+              // Se for um objeto
+              else if (typeof p === "object") {
+                console.log("Produto como objeto:", p);
+                // Procura por campos que podem conter descrição, preço e tipo
+                const desc = p.descricao || p.Descrição || p.description || p.DESCRICAO || "";
+                const preco = p.preco || p.Preço || p.PRECO || p.price || p.PRICE || "";
+                const tipo = p.tipo || p.Tipo || p.TIPO || p.type || p.TYPE || "";
+                
+                return {
+                  description: String(desc).trim(),
+                  price: parsePrice(preco),
+                  type: String(tipo).trim(),
+                };
+              }
+              return { description: "", price: 0, type: "" };
+            });
+
+            // Filtra produtos sem descrição
+            products = products.filter(p => p.description && p.description.trim() !== "");
+            
+            console.log("Produtos processados:", products);
+            
           } else {
             throw new Error(
-              data?.message || "Resposta do Sheets inválida ou vazia.",
+              data?.message || "Resposta do Sheets inválida ou vazia."
             );
           }
         } catch (err) {
@@ -788,13 +861,12 @@
           formSkeleton.classList.add("hidden");
           productSelectionSection.classList.remove("hidden");
           populateProductList();
-          renderCart(); // Garante a renderização do carrinho carregado
+          renderCart();
         }
       }
 
-      // ---------- FUNÇÃO DE GERAÇÃO DE PDF (Foco principal) ----------
+      // ---------- GENERATE PDF ----------
       function generatePDFFromCart() {
-        // Filtra itens com quantidade > 0
         const itemsToPrint = cart.filter((item) => item.quantity > 0);
 
         if (!itemsToPrint.length) {
@@ -807,52 +879,47 @@
 
         pdfTableBody.innerHTML = "";
 
-        // Obtém totais
         const totalItens = itemsToPrint.length;
         const totalQuantidade = itemsToPrint.reduce(
           (sum, o) => sum + (o.quantity || 0),
           0,
         );
+        const totalValor = itemsToPrint.reduce(
+          (sum, o) => sum + ((o.quantity || 0) * (o.price || 0)),
+          0,
+        );
 
-        // Data do Pedido (do campo de input)
         const orderDateValue = orderDate.value;
         const formattedDate = orderDateValue
           ? formatDate(orderDateValue)
           : new Date().toLocaleDateString("pt-BR");
 
-        // MONTAR A TABELA DO PDF (Ordem: Descrição | Quantidade | Tipo)
         itemsToPrint.forEach((o) => {
           const formattedQuantity = formatNumberToLocal(o.quantity);
+          const formattedPrice = formatNumberToLocal(o.price || 0);
+          const subtotal = (o.quantity || 0) * (o.price || 0);
+          const formattedSubtotal = formatNumberToLocal(subtotal);
 
           const tr = document.createElement("tr");
           tr.className = "hover:bg-softgreen";
           tr.innerHTML = `
                     <td class="p-2 border">${escapeHtml(o.description)}</td>
                     <td class="p-2 border text-center font-semibold">${formattedQuantity}</td>
+                    <td class="p-2 border text-center">${o.price > 0 ? "R$ " + formattedPrice : "-"}</td>
+                    <td class="p-2 border text-center font-semibold">${o.price > 0 ? "R$ " + formattedSubtotal : "-"}</td>
                     <td class="p-2 border">${escapeHtml(o.type)}</td>
                 `;
           pdfTableBody.appendChild(tr);
         });
 
-        // LINHA DOS TOTAIS
-        const totalItensRow = document.createElement("tr");
-        totalItensRow.innerHTML = `
-                <td colspan="3" class="p-2 border font-bold bg-gray-50 text-gray-700 text-sm">
-                    Total de Produtos Diferentes: ${totalItens}
+        const totalRow = document.createElement("tr");
+        totalRow.innerHTML = `
+                <td colspan="5" class="p-2 border font-bold bg-gray-50 text-gray-700 text-sm">
+                    Total de Produtos: ${totalItens} | Qtd Total: ${formatNumberToLocal(totalQuantidade)} | Valor Total: R$ ${formatNumberToLocal(totalValor)}
                 </td>
             `;
-        pdfTableBody.appendChild(totalItensRow);
+        pdfTableBody.appendChild(totalRow);
 
-        // LINHA TOTAL DE QUANTIDADE
-        const totalQuantidadeRow = document.createElement("tr");
-        totalQuantidadeRow.innerHTML = `
-                <td colspan="3" class="p-2 border font-bold bg-green-100 text-green-800 text-lg">
-                    TOTAL GERAL: ${formatNumberToLocal(totalQuantidade)}
-                </td>
-            `;
-        pdfTableBody.appendChild(totalQuantidadeRow);
-
-        // DATA DO RELATÓRIO
         reportDate.textContent = `Data/Referência do Pedido: ${formattedDate}`;
 
         const options = {
@@ -872,7 +939,6 @@
         generateCartPDFBtn.textContent = "Gerando...";
         pdfContent.classList.remove("hidden");
 
-        // Inicia a geração do PDF
         html2pdf()
           .from(pdfContent)
           .set(options)
@@ -880,30 +946,22 @@
           .then(() => {
             pdfContent.classList.add("hidden");
             generateCartPDFBtn.disabled = false;
-            generateCartPDFBtn.textContent = "📄 Gerar PDF do Carrinho";
-            showMsg(
-              "PDF do carrinho gerado com sucesso. O carrinho permanece inalterado.",
-              "success",
-            );
+            generateCartPDFBtn.textContent = "📄 Gerar PDF";
+            showMsg("PDF do carrinho gerado com sucesso.", "success");
           })
           .catch((e) => {
             console.error("Erro ao gerar PDF:", e);
             generateCartPDFBtn.disabled = false;
-            generateCartPDFBtn.textContent = "📄 Gerar PDF do Carrinho";
+            generateCartPDFBtn.textContent = "📄 Gerar PDF";
             pdfContent.classList.add("hidden");
             showMsg("Erro ao gerar o PDF. Verifique o console.", "error");
           });
       }
 
-      // ---------- INITIALIZATION ----------
-      generateCartPDFBtn.addEventListener("click", generatePDFFromCart);
-      fetchProducts(); // Carrega produtos e renderiza o carrinho carregado
-
-      //ENVIA DIRETO PARA WHATSAPP
+      // ---------- WHATSAPP ----------
       document
         .getElementById("sendWhatsAppBtn")
         .addEventListener("click", () => {
-          // Filtra apenas itens com quantidade
           const itemsToSendMessage = cart.filter((item) => item.quantity > 0);
 
           if (!itemsToSendMessage.length) {
@@ -911,36 +969,47 @@
             return;
           }
 
-          // Montando o texto da mensagem
           let message = `*PEDIDO - IVO PITA - GLGA*\n`;
           message += `*Data:* ${formatDate(orderDate.value)}\n`;
           message += `----------------------------\n\n`;
 
           itemsToSendMessage.forEach((item) => {
+            const subtotal = (item.quantity || 0) * (item.price || 0);
             message += `✅ *${item.description}*\n`;
-            message += `   Qtd: ${formatNumberToLocal(item.quantity)} ${item.type}\n\n`;
+            message += `   Qtd: ${formatNumberToLocal(item.quantity)} ${item.type}\n`;
+            if (item.price > 0) {
+              message += `   Preço: R$ ${formatNumberToLocal(item.price)}\n`;
+              message += `   Subtotal: R$ ${formatNumberToLocal(subtotal)}\n`;
+            }
+            message += `\n`;
           });
 
           const totalQtd = itemsToSendMessage.reduce(
             (sum, i) => sum + i.quantity,
             0,
           );
+          const totalValor = itemsToSendMessage.reduce(
+            (sum, i) => sum + ((i.quantity || 0) * (i.price || 0)),
+            0,
+          );
+
           message += `----------------------------\n`;
           message += `*Total de itens:* ${itemsToSendMessage.length}\n`;
-          message += `*Volume Total:* ${formatNumberToLocal(totalQtd)}\n\n`;
-          message += `_Gerado via App Pedidos_`;
+          message += `*Volume Total:* ${formatNumberToLocal(totalQtd)}\n`;
+          if (totalValor > 0) {
+            message += `*Valor Total:* R$ ${formatNumberToLocal(totalValor)}\n`;
+          }
+          message += `\n_Gerado via App Pedidos_`;
 
-          // Codifica a mensagem
           const encodedMessage = encodeURIComponent(message);
-
-          // URL SEM O NÚMERO (Abre a lista de contatos)
           const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
 
-          // Abre em uma nova aba/app
           window.open(whatsappUrl, "_blank");
         });
+
+      // ---------- INITIALIZATION ----------
+      generateCartPDFBtn.addEventListener("click", generatePDFFromCart);
+      fetchProducts();
     </script>
   </body>
 </html>
-
-
