@@ -92,7 +92,6 @@
         box-shadow: 0 6px 14px rgba(11, 110, 58, 0.3);
       }
 
-      /* Botão + apenas no mobile */
       .btn-add-mobile {
         width: 36px;
         height: 36px;
@@ -159,7 +158,7 @@
         }
       }
 
-      /* PDF style - ordem: ITEM, PRODUTO, QUANTIDADE, TIPO, PREÇO UNIT., TOTAL */
+      /* PDF style */
       .pdf-container {
         font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
         padding: 28px 32px;
@@ -298,6 +297,25 @@
         color: #6b8a7a;
       }
 
+      /* Input de quantidade no carrinho */
+      .qty-input {
+        width: 60px;
+        padding: 2px 4px;
+        text-align: center;
+        border: 1px solid #cbd5e1;
+        border-radius: 20px;
+        background: white;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1e293b;
+        outline: none;
+        transition: border 0.15s;
+      }
+      .qty-input:focus {
+        border-color: #0b6e3a;
+        box-shadow: 0 0 0 3px rgba(11, 110, 58, 0.2);
+      }
+
       @media (max-width: 640px) {
         body {
           background: #f3faf5;
@@ -324,6 +342,10 @@
           padding: 4px 3px;
           font-size: 8px;
         }
+        .qty-input {
+          width: 50px;
+          font-size: 0.8rem;
+        }
       }
     </style>
 
@@ -334,7 +356,7 @@
 
   <body class="min-h-screen flex flex-col">
 
-    <!-- HEADER ecom -->
+    <!-- HEADER -->
     <header id="mainHeader" class="fixed top-3 left-1/2 -translate-x-1/2 w-[min(820px,96%)] z-50">
       <div class="glass rounded-3xl px-5 py-3 flex items-center justify-between shadow-ecom">
         <div class="flex items-center gap-4">
@@ -361,7 +383,7 @@
       <div class="w-[min(820px,96%)]">
         <div class="grid grid-cols-1 gap-8">
 
-          <!-- SEÇÃO PRODUTOS + CARRINHO (layout ecom) -->
+          <!-- PRODUTOS + CARRINHO -->
           <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
 
             <!-- Produtos (3/5) -->
@@ -417,7 +439,7 @@
                   </div>
                   <div class="flex justify-between text-sm text-gray-600 mt-1">
                     <span>Quantidade total</span>
-                    <span id="cartTotalQuantity" class="font-bold text-green-800">0,00</span>
+                    <span id="cartTotalQuantity" class="font-bold text-green-800">0,000</span>
                   </div>
                   <div class="flex justify-between text-base font-bold text-gray-800 mt-2">
                     <span>Valor total</span>
@@ -444,7 +466,7 @@
       </div>
     </main>
 
-    <!-- PDF oculto - ordem: ITEM, PRODUTO, QUANTIDADE, TIPO, PREÇO UNIT., TOTAL -->
+    <!-- PDF oculto -->
     <div id="pdfContent" class="hidden pdf-container">
       <div class="pdf-header">
         <div class="company-name">Ivo Pita Indústria</div>
@@ -473,7 +495,7 @@
           <tfoot id="pdfTableFoot">
             <tr>
               <td colspan="1" class="total-label">TOTAIS</td><td></td>
-              <td class="total-value" id="pdfTotalQtd">0,00</td>
+              <td class="total-value" id="pdfTotalQtd">0,000</td>
               <td></td>
               <td></td>
               <td class="total-value" id="pdfTotalFinal">R$ 0,00</td>
@@ -481,11 +503,6 @@
           </tfoot>
         </table>
       </div>
-
-      <!-- <div class="pdf-footer">
-        <span>📧 ivo.pita@industria.com</span>
-        <span>🔹 Documento gerado automaticamente</span>
-      </div> -->
     </div>
 
     <script src="https://raw.githack.com/eKoopmans/html2pdf/master/dist/html2pdf.bundle.js">
@@ -496,7 +513,6 @@
       const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwsAXctMIiQ3wewGMWRTpX-JhfMRCXoWS-ek_8SpSsmFK1htwT-ZWDOnQ-SX3b5eIuD-g/exec";
       const CART_STORAGE_KEY = "glga_ivo_cart_items";
 
-      // DADOS DE EXEMPLO (fallback)
       const SAMPLE_PRODUCTS = [
         { description: "Ácido Sulfúrico 98%", price: 45.50, type: "Químico" },
         { description: "Hidróxido de Sódio 99%", price: 38.20, type: "Químico" },
@@ -562,7 +578,6 @@
 
       // ---------- HELPERS ----------
       function loadCart() { try { return JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]"); } catch { return []; } }
-
       function saveCart() { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart)); }
 
       function showMsg(text, type = "success") {
@@ -573,12 +588,16 @@
       }
 
       function escapeHtml(s) { return String(s).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"); }
-
       function escapeAttr(s) { return String(s).replaceAll('"', "&quot;").replaceAll("'", "&#39;"); }
-
       function formatDate(iso) { try { const [y, m, d] = iso.split("-"); return `${d}/${m}/${y}`; } catch { return iso; } }
 
-      function formatNumberToLocal(num) { return (Number(num) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+      // Formatação com 3 casas para quantidades, 2 para preços
+      function formatQty(num) {
+        return (Number(num) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+      }
+      function formatPrice(num) {
+        return (Number(num) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
 
       function parsePrice(priceStr) {
         if (!priceStr) return 0;
@@ -597,8 +616,8 @@
 
         cartCount.textContent = validCart.length;
         cartTotalItems.textContent = validCart.length;
-        cartTotalQuantity.textContent = formatNumberToLocal(totalQuantity);
-        cartTotalValue.textContent = `R$ ${formatNumberToLocal(totalValue)}`;
+        cartTotalQuantity.textContent = formatQty(totalQuantity);
+        cartTotalValue.textContent = `R$ ${formatPrice(totalValue)}`;
 
         if (!validCart.length) {
           noCartItems.classList.remove("hidden");
@@ -627,11 +646,11 @@
           tr.className = "border-b border-gray-100/80";
           tr.innerHTML = `
                 <td class="py-2"><div class="font-medium text-gray-800">${escapeHtml(item.description)}</div>
-                  <div class="text-xs text-gray-400">${item.type ? escapeHtml(item.type) : ""} · R$ ${formatNumberToLocal(item.price)}</div></td>
+                  <div class="text-xs text-gray-400">${item.type ? escapeHtml(item.type) : ""} · R$ ${formatPrice(item.price)}</div></td>
                 <td class="text-center py-2">
                   <div class="flex items-center justify-center gap-1">
                     <button class="qty-btn-minus w-6 h-6 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center text-sm font-bold" data-index="${originalIndex}">−</button>
-                    <span class="qty-display font-semibold text-gray-700 w-8 text-center">${formatNumberToLocal(item.quantity)}</span>
+                    <input type="text" class="qty-input" value="${formatQty(item.quantity)}" data-index="${originalIndex}" />
                     <button class="qty-btn-plus w-6 h-6 rounded-full bg-green-50 text-green-600 hover:bg-green-100 flex items-center justify-center text-sm font-bold" data-index="${originalIndex}">+</button>
                   </div>
                 </td>
@@ -641,11 +660,13 @@
               `;
           tbody.appendChild(tr);
 
+          const input = tr.querySelector(".qty-input");
           const btnPlus = tr.querySelector(".qty-btn-plus");
           const btnMinus = tr.querySelector(".qty-btn-minus");
           const btnRemove = tr.querySelector(".remove-cart-btn");
 
           const update = () => {
+            // remove itens com qtd <= 0
             cart = cart.filter(i => i.quantity > 0);
             cart.sort((a, b) => a.description.localeCompare(b.description));
             renderCart();
@@ -653,12 +674,39 @@
             saveCart();
           };
 
-          btnPlus.addEventListener("click", () => { cart[originalIndex].quantity += 1;
-            update(); });
-          btnMinus.addEventListener("click", () => { cart[originalIndex].quantity = Math.max(0, cart[originalIndex].quantity - 1);
-            update(); });
-          btnRemove.addEventListener("click", () => { cart.splice(originalIndex, 1);
-            update(); });
+          // Evento do input: ao perder foco ou Enter, aplica o valor
+          const applyInput = () => {
+            let raw = input.value.trim().replace(",", ".");
+            let val = parseFloat(raw);
+            if (!isNaN(val) && val >= 0) {
+              cart[originalIndex].quantity = val;
+            } else {
+              // valor inválido: reverte para o atual
+              input.value = formatQty(cart[originalIndex].quantity);
+            }
+            update();
+          };
+
+          input.addEventListener("blur", applyInput);
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              applyInput();
+            }
+          });
+
+          btnPlus.addEventListener("click", () => {
+            cart[originalIndex].quantity += 1;
+            update();
+          });
+          btnMinus.addEventListener("click", () => {
+            cart[originalIndex].quantity = Math.max(0, cart[originalIndex].quantity - 1);
+            update();
+          });
+          btnRemove.addEventListener("click", () => {
+            cart.splice(originalIndex, 1);
+            update();
+          });
         });
 
         cartContainer.appendChild(table);
@@ -667,9 +715,14 @@
 
       function addToCart(desc, type, price, qty = 1) {
         const idx = cart.findIndex(i => i.description === desc);
-        if (idx !== -1) { cart[idx].quantity += qty; if (price !== undefined) cart[idx].price = price;
-          showMsg(`+${formatNumberToLocal(qty)} ${desc}`, "info"); } else { cart.push({ description: desc, type: type || "", quantity: qty, price: price || 0 });
-          showMsg(`${desc} adicionado`, "success"); }
+        if (idx !== -1) {
+          cart[idx].quantity += qty;
+          if (price !== undefined) cart[idx].price = price;
+          showMsg(`+${formatQty(qty)} ${desc}`, "info");
+        } else {
+          cart.push({ description: desc, type: type || "", quantity: qty, price: price || 0 });
+          showMsg(`${desc} adicionado`, "success");
+        }
         cart = cart.filter(i => i.quantity > 0);
         cart.sort((a, b) => a.description.localeCompare(b.description));
         renderCart();
@@ -686,7 +739,7 @@
           const indicator = row.querySelector(`.qty-indicator`);
           if (indicator) {
             const qty = cartItem ? cartItem.quantity : 0;
-            indicator.textContent = qty > 0 ? formatNumberToLocal(qty) : "0";
+            indicator.textContent = qty > 0 ? formatQty(qty) : "0";
             indicator.className = "qty-indicator qty-pill " + (qty > 0 ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-400");
           }
           row.style.borderColor = cartItem ? "#0b6e3a" : "#e4f0e8";
@@ -715,11 +768,11 @@
                   <div class="font-semibold text-gray-800 text-sm truncate">${escapeHtml(p.description)}</div>
                   <div class="flex items-center gap-2 mt-0.5 flex-wrap">
                     <span class="text-xs text-gray-500">${p.type ? escapeHtml(p.type) : ""}</span>
-                    ${hasPrice ? `<span class="text-xs font-bold text-green-700">R$ ${formatNumberToLocal(p.price)}</span>` : '<span class="text-xs text-gray-400">—</span>'}
+                    ${hasPrice ? `<span class="text-xs font-bold text-green-700">R$ ${formatPrice(p.price)}</span>` : '<span class="text-xs text-gray-400">—</span>'}
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="qty-indicator qty-pill ${qty > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'}">${qty > 0 ? formatNumberToLocal(qty) : "0"}</span>
+                  <span class="qty-indicator qty-pill ${qty > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'}">${qty > 0 ? formatQty(qty) : "0"}</span>
                   <button class="add-to-cart-btn btn-add-mobile" 
                     data-desc="${escapeAttr(p.description)}" data-type="${escapeAttr(p.type || "")}" data-price="${p.price || 0}"
                     aria-label="Adicionar ao carrinho">
@@ -799,10 +852,10 @@
           tr.innerHTML = `
                 <td>${String(i + 1).padStart(2, '0')}</td>
                 <td class="text-left product-name">${escapeHtml(o.description)}</td>
-                <td><strong>${formatNumberToLocal(o.quantity)}</strong></td>
+                <td><strong>${formatQty(o.quantity)}</strong></td>
                 <td>${o.type ? o.type.substring(0, 8) : "---"}</td>
-                <td class="price-cell">${o.price > 0 ? "R$ " + formatNumberToLocal(o.price) : "-"}</td>
-                <td class="total-cell">${o.price > 0 ? "R$ " + formatNumberToLocal(subtotal) : "-"}</td>
+                <td class="price-cell">${o.price > 0 ? "R$ " + formatPrice(o.price) : "-"}</td>
+                <td class="total-cell">${o.price > 0 ? "R$ " + formatPrice(subtotal) : "-"}</td>
               `;
           pdfTableBody.appendChild(tr);
         });
@@ -811,8 +864,8 @@
         const now = new Date();
         document.getElementById("pdfDataEmissao").textContent = now.toLocaleDateString("pt-BR");
         document.getElementById("pdfHoraEmissao").textContent = now.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
-        pdfTotalQtd.textContent = formatNumberToLocal(totalQtd);
-        pdfTotalFinal.textContent = `R$ ${formatNumberToLocal(totalValor)}`;
+        pdfTotalQtd.textContent = formatQty(totalQtd);
+        pdfTotalFinal.textContent = `R$ ${formatPrice(totalValor)}`;
 
         const options = { 
           margin: [10, 10, 10, 10], 
@@ -849,11 +902,11 @@
         let msg = `*📋 PEDIDO GLGA - IVO PITA INDÚSTRIA*\nPedido: #${String(pedidoCounter).padStart(3, '0')}\nData: ${formatDate(orderDate.value)}\n━━━━━━━━━━━━━━━━━━━━\n`;
         items.forEach((item, idx) => {
           const sub = (item.quantity * item.price);
-          msg += `*${idx+1}.* ${item.description}\n   Qtd: ${formatNumberToLocal(item.quantity)} · ${item.type ? item.type.substring(0,3).toUpperCase() : "---"}\n   ${item.price > 0 ? "R$ "+formatNumberToLocal(item.price)+" · Total: R$ "+formatNumberToLocal(sub) : "Sem preço"}\n\n`;
+          msg += `*${idx+1}.* ${item.description}\n   Qtd: ${formatQty(item.quantity)} · ${item.type ? item.type.substring(0,3).toUpperCase() : "---"}\n   ${item.price > 0 ? "R$ "+formatPrice(item.price)+" · Total: R$ "+formatPrice(sub) : "Sem preço"}\n\n`;
         });
         const totalQtd = items.reduce((s, i) => s + i.quantity, 0);
         const totalValor = items.reduce((s, i) => s + (i.quantity * i.price), 0);
-        msg += `━━━━━━━━━━━━━━━━━━━━\n*Quantidade total:* ${formatNumberToLocal(totalQtd)}\n*💰 TOTAL:* R$ ${formatNumberToLocal(totalValor)}\n\n_✅ Gerado pelo Sistema Ivo Pita_`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n*Quantidade total:* ${formatQty(totalQtd)}\n*💰 TOTAL:* R$ ${formatPrice(totalValor)}\n\n_✅ Gerado pelo Sistema Ivo Pita_`;
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, "_blank");
       });
 
