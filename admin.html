@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Ivo Pita Indústria</title>
+    <link rel="icon" href="assets/logo_IvoPIta.png" />
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0b6e3a",
+                        accent: "#0f8b4b",
+                        darkbg: "#0d1f14",
+                        darkcard: "#1a2f22",
+                        darkborder: "#2a4a3a",
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        /* ============================================
+           VARIÁVEIS
+           ============================================ */
+        :root {
+            --bg-primary: #f0f7f2;
+            --bg-card: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.92);
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --text-price: #0b6e3a;
+            --border-color: #e5e7eb;
+            --shadow: 0 8px 32px rgba(0, 30, 10, 0.08);
+            --shadow-hover: 0 12px 48px rgba(0, 30, 10, 0.15);
+            --radius: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark {
+            --bg-primary: #0a1a0f;
+            --bg-card: #1a2f22;
+            --bg-glass: rgba(20, 40, 30, 0.92);
+            --text-primary: #e8f0ec;
+            --text-secondary: #a0b8aa;
+            --text-price: #ffffff;
+            --border-color: #2a4a3a;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        /* ============================================
+           SCROLLBAR
+           ============================================ */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0b6e3a;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0f8b4b;
+        }
+
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        .admin-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ============================================
+           HEADER
+           ============================================ */
+        .admin-header {
+            background: linear-gradient(135deg, #0b6e3a, #0a5a2e);
+            border-radius: var(--radius);
+            padding: 16px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 4px 20px rgba(11, 110, 58, 0.25);
+            margin-bottom: 28px;
+        }
+
+        .admin-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .admin-header .brand .logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .admin-header .brand .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .admin-header .brand h1 {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .admin-header .brand h1 span {
+            font-weight: 300;
+            opacity: 0.7;
+            font-size: 0.85rem;
+        }
+
+        .admin-header .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .admin-header .actions .btn-back {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-header .actions .btn-back:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        /* ============================================
+           THEME TOGGLE
+           ============================================ */
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(20deg);
+        }
+
+        /* ============================================
+           CARDS
+           ============================================ */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            margin-bottom: 24px;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+
+        /* ============================================
+           FORM
+           ============================================ */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-grid .full-width {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #0b6e3a;
+            box-shadow: 0 0 0 4px rgba(11, 110, 58, 0.12);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .btn-primary {
+            background: #0b6e3a;
+            color: white;
+            padding: 10px 28px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background: #0f8b4b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(11, 110, 58, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-secondary {
+            background: var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+            transform: scale(1.05);
+        }
+
+        .btn-edit {
+            background: #2563eb;
+            color: white;
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-edit:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-delete:hover {
+            background: #b91c1c;
+            transform: scale(1.05);
+        }
+
+        .btn-export {
+            background: #0b6e3a;
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-export:hover {
+            background: #0f8b4b;
+            transform: scale(1.03);
+        }
+
+        /* ============================================
+           TABELA - PREÇOS BRANCOS NO ESCURO
+           ============================================ */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: var(--bg-primary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        thead th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        tbody tr:hover {
+            background: var(--bg-primary);
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            color: var(--text-primary);
+        }
+
+        /* PREÇO - BRANCO NO MODO ESCURO */
+        .price-cell {
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-price);
+        }
+
+        .dark .price-cell {
+            color: #ffffff !important;
+        }
+
+        tbody td .actions-cell {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        /* ============================================
+           SEARCH
+           ============================================ */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            min-width: 180px;
+            padding: 10px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 30px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-bar input:focus {
+            border-color: #0b6e3a;
+            box-shadow: 0 0 0 4px rgba(11, 110, 58, 0.1);
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        /* ============================================
+           TOAST
+           ============================================ */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 14px 24px;
+            border-radius: 14px;
+            color: white;
+            font-weight: 500;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            animation: slideInToast 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 200px;
+            max-width: 400px;
+        }
+
+        .toast-success { background: #0b6e3a; }
+        .toast-error { background: #dc2626; }
+        .toast-info { background: #2563eb; }
+
+        .toast .toast-icon {
+            font-size: 1.2rem;
+        }
+
+        @keyframes slideInToast {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOutToast {
+            to { transform: translateX(100px); opacity: 0; }
+        }
+
+        .toast.fade-out {
+            animation: fadeOutToast 0.3s ease forwards;
+        }
+
+        /* ============================================
+           BADGE / COUNTER
+           ============================================ */
+        .badge-count {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 2px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            .admin-header {
+                padding: 14px 18px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .admin-header .brand h1 {
+                font-size: 1.1rem;
+            }
+
+            .admin-header .actions {
+                justify-content: flex-start;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid .full-width {
+                flex-direction: column;
+            }
+
+            .form-grid .full-width .btn-primary,
+            .form-grid .full-width .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            .admin-wrapper {
+                padding: 12px;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            thead th,
+            tbody td {
+                padding: 8px 10px;
+            }
+
+            .toast {
+                min-width: unset;
+                max-width: 90vw;
+                font-size: 0.85rem;
+                padding: 12px 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-header .brand .logo {
+                width: 36px;
+                height: 36px;
+            }
+
+            .admin-header .brand h1 {
+                font-size: 0.95rem;
+            }
+
+            .admin-header .actions .btn-back span {
+                display: none;
+            }
+
+            .search-bar input {
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================
+    TOAST CONTAINER
+    ============================================ -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ============================================
+    ADMIN PANEL (SEM LOGIN)
+    ============================================ -->
+    <div id="adminPanel" class="admin-wrapper">
+
+        <!-- HEADER -->
+        <header class="admin-header">
+            <div class="brand">
+                <div class="logo">
+                    <img src="assets/papel ivo preto png.png" alt="Ivo Pita" />
+                </div>
+                <h1>📦 Painel de Produtos <span>· GLGA</span></h1>
+                <span class="badge-count" id="productCount">0</span>
+            </div>
+            <div class="actions">
+                <button id="themeToggle" class="theme-toggle" title="Alternar tema">🌓</button>
+                <a href="index.html" class="btn-back">← <span>Voltar</span></a>
+            </div>
+        </header>
+
+        <!-- FORM -->
+        <div class="card">
+            <div class="card-title">
+                <span id="formIcon">✏️</span>
+                <span id="formTitle">Cadastrar Produto</span>
+            </div>
+            <form id="productForm" onsubmit="handleSaveProduct(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="prodDesc">Descrição *</label>
+                        <input type="text" id="prodDesc" placeholder="Ex: Ácido Sulfúrico 98%" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="prodPrice">Preço (R$)</label>
+                        <input type="number" id="prodPrice" placeholder="0,00" step="0.01" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label for="prodType">Tipo</label>
+                        <input type="text" id="prodType" placeholder="Ex: Unidade" />
+                    </div>
+                    <div class="full-width">
+                        <button type="submit" class="btn-primary">💾 Salvar</button>
+                        <button type="button" onclick="resetForm()" class="btn-secondary">Cancelar</button>
+                        <input type="hidden" id="editIndex" value="-1" />
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- TABLE -->
+        <div class="card">
+            <div class="card-title">
+                <span>📋</span> Lista de Produtos
+                <span style="font-weight:400; font-size:0.8rem; color:var(--text-secondary); opacity:0.7; margin-left:4px;" id="productCountDetail"></span>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Buscar produtos..." oninput="filterProducts()" />
+                <button onclick="loadProducts()" class="btn-secondary" style="padding:8px 18px;">🔄 Atualizar</button>
+                <button onclick="exportCSV()" class="btn-export">📊 Exportar CSV</button>
+            </div>
+
+            <div id="loadingSpinner" style="display:none; text-align:center; padding:40px;">
+                <div style="display:inline-block; width:32px; height:32px; border:3px solid var(--border-color); border-top-color:#0b6e3a; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
+                <p style="color:var(--text-secondary); margin-top:12px;">Carregando produtos...</p>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>Descrição</th>
+                            <th>Tipo</th>
+                            <th style="text-align:right; width:120px;">Preço</th>
+                            <th style="text-align:center; width:160px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="5" style="text-align:center; color:var(--text-secondary); padding:40px;">
+                                Nenhum produto cadastrado
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+    SCRIPTS
+    ============================================ -->
+    <script>
+        // ============================================
+        // CONFIG
+        // ============================================
+        const GOOGLE_SCRIPT_URL =
+            "https://script.google.com/macros/s/AKfycbwsAXctMIiQ3wewGMWRTpX-JhfMRCXoWS-ek_8SpSsmFK1htwT-ZWDOnQ-SX3b5eIuD-g/exec";
+
+        // ============================================
+        // STATE
+        // ============================================
+        let products = [];
+
+        // ============================================
+        // DOM REFS
+        // ============================================
+        const tableBody = document.getElementById('tableBody');
+        const productCount = document.getElementById('productCount');
+        const productCountDetail = document.getElementById('productCountDetail');
+        const searchInput = document.getElementById('searchInput');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        const prodDesc = document.getElementById('prodDesc');
+        const prodPrice = document.getElementById('prodPrice');
+        const prodType = document.getElementById('prodType');
+        const editIndex = document.getElementById('editIndex');
+        const formTitle = document.getElementById('formTitle');
+        const formIcon = document.getElementById('formIcon');
+
+        // ============================================
+        // THEME
+        // ============================================
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            localStorage.setItem('admin-theme', theme);
+        }
+
+        function toggleTheme() {
+            const current = localStorage.getItem('admin-theme') || 'light';
+            applyTheme(current === 'light' ? 'dark' : 'light');
+        }
+
+        (function initTheme() {
+            const saved = localStorage.getItem('admin-theme') ||
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(saved);
+        })();
+
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            toast.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ️'}</span> ${message}`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // ============================================
+        // API
+        // ============================================
+        async function loadProducts() {
+            loadingSpinner.style.display = 'block';
+            tableBody.innerHTML =
+                `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary); padding:40px;">Carregando...</td></tr>`;
+
+            try {
+                const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProducts&t=${Date.now()}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+                if (data?.status === 'success' && Array.isArray(data.products)) {
+                    products = data.products.map(p => {
+                        if (Array.isArray(p)) {
+                            return {
+                                description: p[0] || '',
+                                price: parseFloat(String(p[1] || '').replace(',', '.')) || 0,
+                                type: p[2] || ''
+                            };
+                        }
+                        if (typeof p === 'object') {
+                            return {
+                                description: String(p.descricao || p.Descrição || p.description || p.DESCRICAO || '')
+                                    .trim(),
+                                price: parseFloat(String(p.preco || p.Preço || p.PRECO || p.price || '').replace(',',
+                                    '.')) || 0,
+                                type: String(p.tipo || p.Tipo || p.TIPO || p.type || '').trim()
+                            };
+                        }
+                        return { description: '', price: 0, type: '' };
+                    }).filter(p => p.description && p.description.trim() !== '');
+                } else {
+                    throw new Error(data?.message || 'Dados inválidos');
+                }
+            } catch (err) {
+                console.warn('Erro ao carregar:', err);
+                showToast('Erro ao carregar produtos: ' + err.message, 'error');
+                // Fallback
+                products = [
+                    { description: 'ABRILHANTADOR FOLHEAÇÃO EVO GL', price: 1416.00, type: 'LITRO' },
+                    { description: 'ABRILHANTADOR PARTE A', price: 1595.00, type: 'LITRO' },
+                    { description: 'ABRILHANTADOR PARTE B', price: 1595.00, type: 'LITRO' },
+                    { description: 'ABRILHANTADOR GL AG A PRATA', price: 410.00, type: 'LITRO' },
+                    { description: 'ABRILHANTADOR GL AG B PRATA', price: 0.00, type: 'LITRO' }
+                ];
+                showToast('Usando dados de exemplo (fallback)', 'info');
+            } finally {
+                loadingSpinner.style.display = 'none';
+                renderTable();
+                updateCount();
+            }
+        }
+
+        async function saveProduct(product, isEdit = false, index = -1) {
+            const action = isEdit ? 'updateProduct' : 'addProduct';
+            const payload = { action, product, index };
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                showToast(isEdit ? 'Produto atualizado!' : 'Produto cadastrado!', 'success');
+                await loadProducts();
+                resetForm();
+                return true;
+            } catch (err) {
+                console.error('Erro ao salvar:', err);
+                showToast('Erro ao salvar produto. Tente novamente.', 'error');
+                return false;
+            }
+        }
+
+        async function deleteProduct(index) {
+            if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'deleteProduct', index })
+                });
+                showToast('Produto excluído!', 'success');
+                await loadProducts();
+            } catch (err) {
+                console.error('Erro ao excluir:', err);
+                showToast('Erro ao excluir produto.', 'error');
+            }
+        }
+
+        // ============================================
+        // RENDER TABLE
+        // ============================================
+        function renderTable(filter = '') {
+            const filtered = products.filter(p =>
+                p.description.toLowerCase().includes(filter.toLowerCase()) ||
+                (p.type || '').toLowerCase().includes(filter.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML =
+                    `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary); padding:40px;">${products.length === 0 ? 'Nenhum produto cadastrado' : 'Nenhum resultado encontrado'}</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = filtered.map((p, idx) => {
+                const realIndex = products.indexOf(p);
+                return `
+                    <tr>
+                        <td style="color:var(--text-secondary); font-weight:500;">${String(idx + 1).padStart(2, '0')}</td>
+                        <td><strong>${escapeHtml(p.description)}</strong></td>
+                        <td>${escapeHtml(p.type || '-')}</td>
+                        <td class="price-cell">${p.price > 0 ? 'R$ ' + formatPrice(p.price) : '-'}</td>
+                        <td style="text-align:center;">
+                            <div class="actions-cell" style="justify-content:center;">
+                                <button onclick="editProduct(${realIndex})" class="btn-edit">✏️</button>
+                                <button onclick="deleteProduct(${realIndex})" class="btn-delete">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterProducts() {
+            renderTable(searchInput.value);
+        }
+
+        function updateCount() {
+            const count = products.length;
+            productCount.textContent = count;
+            productCountDetail.textContent = `· ${count} produto${count !== 1 ? 's' : ''}`;
+        }
+
+        // ============================================
+        // FORM
+        // ============================================
+        function resetForm() {
+            prodDesc.value = '';
+            prodPrice.value = '';
+            prodType.value = '';
+            editIndex.value = '-1';
+            formTitle.textContent = 'Cadastrar Produto';
+            formIcon.textContent = '✏️';
+            prodDesc.focus();
+        }
+
+        function editProduct(index) {
+            const p = products[index];
+            if (!p) return;
+            prodDesc.value = p.description;
+            prodPrice.value = p.price || '';
+            prodType.value = p.type || '';
+            editIndex.value = index;
+            formTitle.textContent = 'Editar Produto';
+            formIcon.textContent = '✏️';
+            prodDesc.focus();
+            prodDesc.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        async function handleSaveProduct(e) {
+            e.preventDefault();
+            const desc = prodDesc.value.trim();
+            const price = parseFloat(prodPrice.value.replace(',', '.')) || 0;
+            const type = prodType.value.trim();
+            const idx = parseInt(editIndex.value);
+
+            if (!desc) {
+                showToast('Descrição é obrigatória!', 'error');
+                prodDesc.focus();
+                return;
+            }
+
+            const product = { description: desc, price, type };
+
+            if (idx >= 0 && idx < products.length) {
+                await saveProduct(product, true, idx);
+            } else {
+                if (products.some(p => p.description.toLowerCase() === desc.toLowerCase())) {
+                    showToast('Produto já existe!', 'error');
+                    return;
+                }
+                await saveProduct(product, false);
+            }
+        }
+
+        // ============================================
+        // EXPORT CSV
+        // ============================================
+        function exportCSV() {
+            if (products.length === 0) {
+                showToast('Nenhum produto para exportar', 'error');
+                return;
+            }
+            const headers = ['Descrição', 'Preço', 'Tipo'];
+            const rows = products.map(p => [p.description, p.price, p.type]);
+            const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `produtos_ivo_pita_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            showToast('CSV exportado!', 'success');
+        }
+
+        // ============================================
+        // HELPERS
+        // ============================================
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatPrice(num) {
+            return (Number(num) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // ============================================
+        // KEYBOARD SHORTCUTS
+        // ============================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') resetForm();
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                loadProducts();
+            }
+        });
+
+        // ============================================
+        // INIT
+        // ============================================
+        loadProducts();
+    </script>
+</body>
+</html>
