@@ -437,6 +437,167 @@
       }
 
       /* ============================================
+         MODAL - ESCOLHA DO PDF
+         ============================================ */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        padding: 20px;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .modal-overlay.hidden {
+        display: none;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      .modal-box {
+        background: var(--card-bg);
+        border-radius: 28px;
+        padding: 32px 28px;
+        max-width: 440px;
+        width: 100%;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+        border: 1px solid var(--card-border);
+      }
+
+      .modal-box h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-align: center;
+        margin-bottom: 6px;
+      }
+
+      .modal-box .sub {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+      }
+
+      .modal-option {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 18px;
+        border-radius: 16px;
+        border: 2px solid var(--card-border);
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 10px;
+        background: var(--card-bg);
+      }
+
+      .modal-option:hover {
+        border-color: #0b6e3a;
+        background: var(--product-hover);
+      }
+
+      .modal-option.selected {
+        border-color: #0b6e3a;
+        background: var(--badge-bg);
+      }
+
+      .dark .modal-option.selected {
+        border-color: #6bc48a;
+        background: #1a3a2a;
+      }
+
+      .modal-option .icon {
+        font-size: 1.6rem;
+        flex-shrink: 0;
+      }
+
+      .modal-option .info .title {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+      }
+
+      .modal-option .info .desc {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      .modal-option input[type="radio"] {
+        display: none;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .modal-actions button {
+        flex: 1;
+        padding: 14px;
+        border-radius: 60px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.15s;
+        min-height: 48px;
+      }
+
+      .modal-actions .btn-confirm {
+        background: #0b6e3a;
+        color: white;
+      }
+
+      .modal-actions .btn-confirm:active {
+        transform: scale(0.97);
+      }
+
+      .modal-actions .btn-cancel {
+        background: var(--pill-bg);
+        color: var(--text-secondary);
+      }
+
+      .modal-actions .btn-cancel:active {
+        transform: scale(0.97);
+      }
+
+      /* ============================================
+         WHATSAPP BUTTON - MOBILE
+         ============================================ */
+      .btn-whatsapp {
+        background: #25D366;
+        color: white;
+        font-weight: 600;
+        padding: 14px;
+        border-radius: 60px;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 52px;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .btn-whatsapp:active {
+        transform: scale(0.97);
+        background: #1ebe5c;
+      }
+
+      /* ============================================
          PDF
          ============================================ */
       .pdf-container {
@@ -581,33 +742,6 @@
       }
 
       /* ============================================
-         WHATSAPP BUTTON - MOBILE
-         ============================================ */
-      .btn-whatsapp {
-        background: #25D366;
-        color: white;
-        font-weight: 600;
-        padding: 14px;
-        border-radius: 60px;
-        border: none;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        width: 100%;
-        min-height: 52px;
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      .btn-whatsapp:active {
-        transform: scale(0.97);
-        background: #1ebe5c;
-      }
-
-      /* ============================================
          RESPONSIVE - MOBILE FIRST
          ============================================ */
       @media (max-width: 480px) {
@@ -710,6 +844,29 @@
         #messageBox {
           font-size: 0.85rem !important;
           padding: 12px 14px !important;
+        }
+        .modal-box {
+          padding: 24px 18px !important;
+        }
+        .modal-box h3 {
+          font-size: 1.1rem !important;
+        }
+        .modal-option {
+          padding: 12px 14px !important;
+        }
+        .modal-option .icon {
+          font-size: 1.3rem !important;
+        }
+        .modal-option .info .title {
+          font-size: 0.85rem !important;
+        }
+        .modal-option .info .desc {
+          font-size: 0.7rem !important;
+        }
+        .modal-actions button {
+          font-size: 0.85rem !important;
+          padding: 12px !important;
+          min-height: 44px !important;
         }
       }
 
@@ -884,6 +1041,37 @@
       </div>
     </main>
 
+    <!-- MODAL - ESCOLHA DO PDF -->
+    <div id="pdfModal" class="modal-overlay hidden">
+      <div class="modal-box">
+        <h3>📄 Gerar PDF</h3>
+        <p class="sub">Escolha como deseja gerar o documento</p>
+
+        <label class="modal-option" id="optWithPrice">
+          <input type="radio" name="pdfChoice" value="with" />
+          <span class="icon">💰</span>
+          <div class="info">
+            <div class="title">Com preços</div>
+            <div class="desc">Inclui valores unitários e total</div>
+          </div>
+        </label>
+
+        <label class="modal-option selected" id="optWithoutPrice">
+          <input type="radio" name="pdfChoice" value="without" checked />
+          <span class="icon">🔒</span>
+          <div class="info">
+            <div class="title">Sem preços</div>
+            <div class="desc">Apenas produtos e quantidades</div>
+          </div>
+        </label>
+
+        <div class="modal-actions">
+          <button class="btn-cancel" id="modalCancel">Cancelar</button>
+          <button class="btn-confirm" id="modalConfirm">✅ Gerar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- PDF -->
     <div id="pdfContent" class="hidden pdf-container">
       <div class="pdf-header">
@@ -897,25 +1085,21 @@
         </div>
       </div>
       <div class="overflow-x-auto">
-        <table class="pdf-table">
+        <table class="pdf-table" id="pdfTable">
           <thead>
-            <tr>
-              <th style="width:6%;">Item</th>
-              <th style="width:34%;" class="text-left">Produto</th>
-              <th style="width:12%;">Quantidade</th>
-              <th style="width:12%;">Tipo</th>
-              <th style="width:16%;">Preço Unit.</th>
-              <th style="width:20%;">Total</th>
+            <tr id="pdfTableHead">
+              <th style="width:8%;">Item</th>
+              <th style="width:52%;" class="text-left">Produto</th>
+              <th style="width:20%;">Quantidade</th>
+              <th style="width:20%;">Tipo</th>
             </tr>
           </thead>
           <tbody id="pdfTableBody"></tbody>
           <tfoot id="pdfTableFoot">
             <tr>
-              <td colspan="1" class="total-label">TOTAIS</td><td></td>
+              <td colspan="2" class="total-label" style="text-align:right;">TOTAIS</td>
               <td class="total-value" id="pdfTotalQtd">0,000</td>
               <td></td>
-              <td></td>
-              <td class="total-value" id="pdfTotalFinal">R$ 0,00</td>
             </tr>
           </tfoot>
         </table>
@@ -959,8 +1143,16 @@
       const clearCartBtn = document.getElementById("clearCartBtn");
       const pdfContent = document.getElementById("pdfContent");
       const pdfTableBody = document.getElementById("pdfTableBody");
+      const pdfTableHead = document.getElementById("pdfTableHead");
+      const pdfTableFoot = document.getElementById("pdfTableFoot");
       const pdfTotalQtd = document.getElementById("pdfTotalQtd");
-      const pdfTotalFinal = document.getElementById("pdfTotalFinal");
+      
+      // Modal
+      const pdfModal = document.getElementById("pdfModal");
+      const modalConfirm = document.getElementById("modalConfirm");
+      const modalCancel = document.getElementById("modalCancel");
+      const optWithPrice = document.getElementById("optWithPrice");
+      const optWithoutPrice = document.getElementById("optWithoutPrice");
 
       // ============================================
       // INICIALIZAÇÃO
@@ -995,6 +1187,58 @@
           applyTheme(next);
         });
       })();
+
+      // ============================================
+      // MODAL - ESCOLHA DO PDF
+      // ============================================
+      function openPdfModal() {
+        const items = cart.filter(i => i.quantity > 0);
+        if (!items.length) { 
+          showMsg("Carrinho vazio", "error"); 
+          return; 
+        }
+        pdfModal.classList.remove("hidden");
+        // Reset seleção para "Sem preços" como padrão
+        document.querySelector('input[name="pdfChoice"][value="without"]').checked = true;
+        optWithoutPrice.classList.add("selected");
+        optWithPrice.classList.remove("selected");
+      }
+
+      function closePdfModal() {
+        pdfModal.classList.add("hidden");
+      }
+
+      // Seleção das opções no modal
+      document.querySelectorAll('input[name="pdfChoice"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+          document.querySelectorAll('.modal-option').forEach(opt => opt.classList.remove('selected'));
+          if (this.value === 'with') {
+            optWithPrice.classList.add('selected');
+          } else {
+            optWithoutPrice.classList.add('selected');
+          }
+        });
+      });
+
+      // Clicar na label também seleciona
+      optWithPrice.addEventListener('click', () => {
+        document.querySelector('input[name="pdfChoice"][value="with"]').checked = true;
+        document.querySelectorAll('.modal-option').forEach(opt => opt.classList.remove('selected'));
+        optWithPrice.classList.add('selected');
+      });
+
+      optWithoutPrice.addEventListener('click', () => {
+        document.querySelector('input[name="pdfChoice"][value="without"]').checked = true;
+        document.querySelectorAll('.modal-option').forEach(opt => opt.classList.remove('selected'));
+        optWithoutPrice.classList.add('selected');
+      });
+
+      modalCancel.addEventListener('click', closePdfModal);
+      
+      // Fechar modal clicando fora
+      pdfModal.addEventListener('click', (e) => {
+        if (e.target === pdfModal) closePdfModal();
+      });
 
       // ============================================
       // HELPERS
@@ -1052,21 +1296,16 @@
       function parsePrice(priceStr) {
         if (!priceStr) return 0;
         
-        // Remove R$, espaços e outros caracteres
         let cleaned = String(priceStr)
             .replace(/R\$/gi, '')
             .replace(/\s/g, '')
             .trim();
         
-        // Se tiver vazio depois de limpar
         if (!cleaned) return 0;
         
-        // Se tiver ponto E vírgula (ex: 1.449,00 -> formato brasileiro com milhar)
         if (cleaned.includes('.') && cleaned.includes(',')) {
-            // Remove pontos de milhar e troca vírgula por ponto
             cleaned = cleaned.replace(/\./g, '').replace(',', '.');
         } else if (cleaned.includes(',')) {
-            // Apenas vírgula: 14,49 -> troca por ponto
             cleaned = cleaned.replace(',', '.');
         }
         
@@ -1302,9 +1541,7 @@
           console.log('📄 Dados recebidos:', data);
           
           if (data?.status === "success" && Array.isArray(data.products) && data.products.length > 0) {
-            // Mapeia os produtos usando a função parsePrice corrigida
             products = data.products.map(p => {
-              // Se for array, mapeia pelos índices
               if (Array.isArray(p)) {
                 return {
                   description: String(p[0] || "").trim(),
@@ -1312,7 +1549,6 @@
                   type: String(p[2] || "").trim()
                 };
               }
-              // Se for objeto, mapeia pelas chaves
               if (typeof p === "object") {
                 const desc = p.descricao || p.Descrição || p.description || p.DESCRICAO || "";
                 const preco = p.preco || p.Preço || p.PRECO || p.price || "";
@@ -1337,11 +1573,7 @@
           }
         } catch (err) {
           console.error('❌ Erro ao carregar produtos:', err);
-          
-          // MOSTRA O ERRO DETALHADO
           showMsg(`❌ Erro ao carregar: ${err.message}`, "error");
-          
-          // NÃO USA DADOS HARCODED
           products = [];
           productListEl.innerHTML = `
             <div class="text-sm p-4 text-center" style="color:var(--text-light);">
@@ -1367,15 +1599,36 @@
       }
 
       // ============================================
-      // PDF
+      // PDF - COM OU SEM PREÇOS
       // ============================================
-      function generatePDFFromCart() {
+      function generatePDFFromCart(showPrices) {
         const items = cart.filter(i => i.quantity > 0);
         if (!items.length) { 
           showMsg("Carrinho vazio", "error"); 
           return; 
         }
         
+        // Atualiza cabeçalho da tabela
+        const headRow = pdfTableHead;
+        if (showPrices) {
+          headRow.innerHTML = `
+            <th style="width:6%;">Item</th>
+            <th style="width:34%;" class="text-left">Produto</th>
+            <th style="width:12%;">Quantidade</th>
+            <th style="width:12%;">Tipo</th>
+            <th style="width:16%;" class="price-col">Preço Unit.</th>
+            <th style="width:20%;" class="price-col">Total</th>
+          `;
+        } else {
+          headRow.innerHTML = `
+            <th style="width:8%;">Item</th>
+            <th style="width:52%;" class="text-left">Produto</th>
+            <th style="width:20%;">Quantidade</th>
+            <th style="width:20%;">Tipo</th>
+          `;
+        }
+        
+        // Limpa corpo
         pdfTableBody.innerHTML = "";
         const totalQtd = items.reduce((s, i) => s + i.quantity, 0);
         const totalValor = items.reduce((s, i) => s + (i.quantity * i.price), 0);
@@ -1383,27 +1636,49 @@
         items.forEach((o, i) => {
           const tr = document.createElement("tr");
           const subtotal = o.quantity * o.price;
-          tr.innerHTML = `
+          let cols = `
             <td>${String(i + 1).padStart(2, '0')}</td>
             <td class="text-left product-name">${escapeHtml(o.description)}</td>
             <td><strong>${formatQty(o.quantity)}</strong></td>
             <td>${o.type ? o.type.substring(0, 8) : "---"}</td>
-            <td class="price-cell">${o.price > 0 ? "R$ " + formatPrice(o.price) : "-"}</td>
-            <td class="total-cell">${o.price > 0 ? "R$ " + formatPrice(subtotal) : "-"}</td>
           `;
+          if (showPrices) {
+            cols += `
+              <td class="price-cell">${o.price > 0 ? "R$ " + formatPrice(o.price) : "-"}</td>
+              <td class="total-cell">${o.price > 0 ? "R$ " + formatPrice(subtotal) : "-"}</td>
+            `;
+          }
+          tr.innerHTML = cols;
           pdfTableBody.appendChild(tr);
         });
 
+        // Atualiza rodapé
+        const footRow = pdfTableFoot.querySelector('tr');
+        if (showPrices) {
+          footRow.innerHTML = `
+            <td colspan="1" class="total-label">TOTAIS</td><td></td>
+            <td class="total-value">${formatQty(totalQtd)}</td>
+            <td></td>
+            <td class="price-col"></td>
+            <td class="total-value price-col">R$ ${formatPrice(totalValor)}</td>
+          `;
+        } else {
+          footRow.innerHTML = `
+            <td colspan="2" class="total-label" style="text-align:right;">TOTAIS</td>
+            <td class="total-value">${formatQty(totalQtd)}</td>
+            <td></td>
+          `;
+        }
+
+        // Atualiza cabeçalho do PDF
         document.getElementById("pdfPedidoNum").textContent = `#${String(pedidoCounter).padStart(3, '0')}`;
         const now = new Date();
         document.getElementById("pdfDataEmissao").textContent = now.toLocaleDateString("pt-BR");
         document.getElementById("pdfHoraEmissao").textContent = now.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
-        pdfTotalQtd.textContent = formatQty(totalQtd);
-        pdfTotalFinal.textContent = `R$ ${formatPrice(totalValor)}`;
 
         const options = { 
           margin: [10, 10, 10, 10], 
-          filename: `Pedido_GLGA_${new Date().toISOString().split("T")[0]}_${String(pedidoCounter).padStart(3, '0')}.pdf`, 
+          filename: `Pedido_GLGA_${new Date().toISOString().split("T")[0]}_${String(pedidoCounter).padStart(3, '0')}${showPrices ? '' : '_sem_precos'}.pdf`, 
           image: { type: "jpeg", quality: 0.98 }, 
           html2canvas: { scale: 2, logging: false, useCORS: true }, 
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" } 
@@ -1419,18 +1694,20 @@
             generateCartPDFBtn.disabled = false;
             generateCartPDFBtn.textContent = "📄 Gerar PDF";
             showMsg("PDF gerado com sucesso!", "success");
+            closePdfModal();
           }).catch(e => { 
             console.error(e);
             generateCartPDFBtn.disabled = false;
             generateCartPDFBtn.textContent = "📄 Gerar PDF";
             pdfContent.classList.add("hidden");
-            showMsg("Erro ao gerar PDF", "error"); 
+            showMsg("Erro ao gerar PDF", "error");
+            closePdfModal();
           });
         }, 400);
       }
 
       // ============================================
-      // WHATSAPP
+      // WHATSAPP - SEMPRE SEM PREÇOS
       // ============================================
       document.getElementById("sendWhatsAppBtn").addEventListener("click", () => {
         const items = cart.filter(i => i.quantity > 0);
@@ -1439,21 +1716,39 @@
           return; 
         }
         
-        let msg = `*📋 PEDIDO GLGA - IVO PITA INDÚSTRIA*\nPedido: #${String(pedidoCounter).padStart(3, '0')}\nData: ${formatDate(orderDate.value)}\n━━━━━━━━━━━━━━━━━━━━\n`;
+        let msg = `*📋 PEDIDO GLGA - IVO PITA INDÚSTRIA*\n`;
+        msg += `Pedido: #${String(pedidoCounter).padStart(3, '0')}\n`;
+        msg += `Data: ${formatDate(orderDate.value)}\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
         items.forEach((item, idx) => {
-          const sub = (item.quantity * item.price);
-          msg += `*${idx+1}.* ${item.description}\n   Qtd: ${formatQty(item.quantity)} · ${item.type ? item.type.substring(0,3).toUpperCase() : "---"}\n   ${item.price > 0 ? "R$ "+formatPrice(item.price)+" · Total: R$ "+formatPrice(sub) : "Sem preço"}\n\n`;
+          msg += `*${idx+1}.* ${item.description}\n`;
+          msg += `   📦 Qtd: ${formatQty(item.quantity)}`;
+          if (item.type) {
+            msg += ` · ${item.type.substring(0,3).toUpperCase()}`;
+          }
+          msg += `\n\n`;
         });
+        
         const totalQtd = items.reduce((s, i) => s + i.quantity, 0);
-        const totalValor = items.reduce((s, i) => s + (i.quantity * i.price), 0);
-        msg += `━━━━━━━━━━━━━━━━━━━━\n*Quantidade total:* ${formatQty(totalQtd)}\n*💰 TOTAL:* R$ ${formatPrice(totalValor)}\n\n_✅ Gerado pelo Sistema Ivo Pita_`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `*📊 Total de itens:* ${items.length}\n`;
+        msg += `*📦 Quantidade total:* ${formatQty(totalQtd)}\n\n`;
+        msg += `_✅ Gerado pelo Sistema Ivo Pita_`;
+        
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, "_blank");
       });
 
       // ============================================
       // EVENTOS
       // ============================================
-      generateCartPDFBtn.addEventListener("click", generatePDFFromCart);
+      generateCartPDFBtn.addEventListener("click", openPdfModal);
+      
+      modalConfirm.addEventListener("click", () => {
+        const selected = document.querySelector('input[name="pdfChoice"]:checked');
+        const showPrices = selected ? selected.value === 'with' : false;
+        generatePDFFromCart(showPrices);
+      });
       
       clearCartBtn.addEventListener("click", () => { 
         if (confirm("Limpar carrinho?")) { 
