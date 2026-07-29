@@ -838,7 +838,7 @@
                 <div class="logo">
                     <img src="assets/papel ivo preto png.png" alt="Ivo Pita" />
                 </div>
-                <h1>📦 Painel de Produtos <span></span></h1>
+                <h1>📦 Painel de Produtos<span></span></h1>
                 <span class="badge-count" id="productCount">0</span>
             </div>
             <div class="actions">
@@ -928,7 +928,7 @@
     ============================================ -->
     <script>
         // ============================================
-        // CONFIG - ATUALIZE COM SUA URL
+        // CONFIG - URL DO GOOGLE APPS SCRIPT
         // ============================================
         const GOOGLE_SCRIPT_URL =
             "https://script.google.com/macros/s/AKfycbwjyb67ypHFuGT_68-lHd1Rymk_TMy3ggAchrRr_4-6WppCSuZfDeH1TvRHKZemBr8I/exec";
@@ -997,63 +997,83 @@
         }
 
         // ============================================
-        // API
+        // API - BUSCA DA PLANILHA
         // ============================================
         async function loadProducts() {
             loadingSpinner.style.display = 'block';
             tableBody.innerHTML =
-                `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem;">Carregando...</td></tr>`;
+                `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem;">Carregando da planilha...</td></tr>`;
 
             try {
-                const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProducts&t=${Date.now()}`, {
+                const url = `${GOOGLE_SCRIPT_URL}?action=getProducts&t=${Date.now()}`;
+                console.log('🔍 Buscando produtos da planilha (admin):', url);
+                
+                const res = await fetch(url, {
                     mode: 'cors',
                     headers: {
                         'Accept': 'application/json',
                     }
                 });
+                
+                console.log('📡 Status:', res.status);
+                
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
                 const data = await res.json();
+                console.log('📄 Dados recebidos:', data);
+                
                 if (data?.status === 'success' && Array.isArray(data.products)) {
                     products = data.products.map(p => {
                         if (Array.isArray(p)) {
                             return {
-                                description: p[0] || '',
+                                description: String(p[0] || "").trim(),
                                 price: parseFloat(String(p[1] || '').replace(',', '.')) || 0,
-                                type: p[2] || ''
+                                type: String(p[2] || "").trim()
                             };
                         }
                         if (typeof p === 'object') {
+                            const desc = p.descricao || p.Descrição || p.description || p.DESCRICAO || "";
+                            const preco = p.preco || p.Preço || p.PRECO || p.price || "";
+                            const tipo = p.tipo || p.Tipo || p.TIPO || p.type || "";
                             return {
-                                description: String(p.descricao || p.Descrição || p.description || p.DESCRICAO || '')
-                                    .trim(),
-                                price: parseFloat(String(p.preco || p.Preço || p.PRECO || p.price || '').replace(',',
-                                    '.')) || 0,
-                                type: String(p.tipo || p.Tipo || p.TIPO || p.type || '').trim()
+                                description: String(desc).trim(),
+                                price: parseFloat(String(preco).replace(',', '.')) || 0,
+                                type: String(tipo).trim()
                             };
                         }
                         return { description: '', price: 0, type: '' };
-                    }).filter(p => p.description && p.description.trim() !== '');
+                    }).filter(p => p.description && p.description !== '');
+                    
+                    if (products.length > 0) {
+                        showToast(`✅ ${products.length} produtos carregados da planilha!`, 'success');
+                        console.log('✅ Produtos carregados:', products);
+                    } else {
+                        throw new Error('Nenhum produto válido encontrado na planilha');
+                    }
                 } else {
-                    throw new Error(data?.message || 'Dados inválidos');
+                    throw new Error(data?.message || 'Dados inválidos da planilha');
                 }
             } catch (err) {
-                console.warn('Erro ao carregar:', err);
-                showToast('Erro ao carregar produtos', 'error');
-                // Fallback com dados da sua planilha
-                products = [
-                    { description: 'ABRILHANTADOR FOLHEAÇÃO EVO GL', price: 1416.00, type: 'LITRO' },
-                    { description: 'ABRILHANTADOR PARTE A', price: 1595.00, type: 'LITRO' },
-                    { description: 'ABRILHANTADOR PARTE B', price: 1595.00, type: 'LITRO' },
-                    { description: 'ABRILHANTADOR GL AG A PRATA', price: 410.00, type: 'LITRO' },
-                    { description: 'ABRILHANTADOR GL AG B PRATA', price: 0.00, type: 'LITRO' },
-                    { description: 'ACIDO CLORIDRICO QP C 33% D 1.20', price: 14.49, type: 'KG' },
-                    { description: 'ACIDO NITRICO QP BB', price: 10.95, type: 'KG' },
-                    { description: 'ACIDO SULFURICO BB IND. C 98,6', price: 7.49, type: 'KG' },
-                    { description: 'ACIDO SULFURICO PA ACS C. 98% D 1.84', price: 49.80, type: 'KG' },
-                    { description: 'AJUSTE R', price: 0, type: 'LITRO' },
-                ];
-                showToast('Usando dados de exemplo', 'info');
+                console.error('❌ Erro ao carregar produtos:', err);
+                
+                // NÃO USA DADOS HARCODED - APENAS MOSTRA ERRO
+                products = [];
+                showToast(`❌ Erro ao carregar: ${err.message}`, 'error');
+                
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:20px 10px;">
+                            <div style="color:var(--text-secondary); font-size:0.7rem;">
+                                <span style="font-size:1.5rem; display:block; margin-bottom:4px;">⚠️</span>
+                                <p style="font-weight:600; color:var(--text-primary);">Erro ao carregar produtos</p>
+                                <p style="font-size:0.65rem; margin-top:2px;">${escapeHtml(err.message)}</p>
+                                <button onclick="loadProducts()" style="margin-top:8px; padding:4px 16px; border-radius:20px; border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); cursor:pointer; font-size:0.7rem;">
+                                    🔄 Tentar novamente
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             } finally {
                 loadingSpinner.style.display = 'none';
                 renderTable();
@@ -1061,28 +1081,35 @@
             }
         }
 
+        // ============================================
+        // API - SALVAR NA PLANILHA
+        // ============================================
         async function saveProduct(product, isEdit = false, index = -1) {
             const action = isEdit ? 'updateProduct' : 'addProduct';
             const payload = { action, product, index };
 
             try {
-                await fetch(GOOGLE_SCRIPT_URL, {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                showToast(isEdit ? 'Produto atualizado!' : 'Produto cadastrado!', 'success');
+                
+                showToast(isEdit ? '✅ Produto atualizado!' : '✅ Produto cadastrado!', 'success');
                 await loadProducts();
                 resetForm();
                 return true;
             } catch (err) {
                 console.error('Erro ao salvar:', err);
-                showToast('Erro ao salvar produto', 'error');
+                showToast('❌ Erro ao salvar produto', 'error');
                 return false;
             }
         }
 
+        // ============================================
+        // API - EXCLUIR DA PLANILHA
+        // ============================================
         async function deleteProduct(index) {
             if (!confirm('Excluir este produto?')) return;
 
@@ -1093,11 +1120,11 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'deleteProduct', index })
                 });
-                showToast('Produto excluído!', 'success');
+                showToast('🗑️ Produto excluído!', 'success');
                 await loadProducts();
             } catch (err) {
                 console.error('Erro ao excluir:', err);
-                showToast('Erro ao excluir produto', 'error');
+                showToast('❌ Erro ao excluir produto', 'error');
             }
         }
 
@@ -1105,14 +1132,30 @@
         // RENDER TABLE
         // ============================================
         function renderTable(filter = '') {
+            if (!products || products.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem;">
+                            Nenhum produto cadastrado na planilha
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
             const filtered = products.filter(p =>
                 p.description.toLowerCase().includes(filter.toLowerCase()) ||
                 (p.type || '').toLowerCase().includes(filter.toLowerCase())
             );
 
             if (filtered.length === 0) {
-                tableBody.innerHTML =
-                    `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem;">${products.length === 0 ? 'Nenhum produto cadastrado' : 'Nenhum resultado encontrado'}</td></tr>`;
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem;">
+                            Nenhum resultado encontrado
+                        </td>
+                    </tr>
+                `;
                 return;
             }
 
