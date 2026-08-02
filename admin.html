@@ -256,7 +256,8 @@
             letter-spacing: 0.3px;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
             padding: 8px 12px;
             border: 1.5px solid var(--border-color);
@@ -270,7 +271,16 @@
             height: 38px;
         }
 
-        .form-group input:focus {
+        .form-group select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
             border-color: #0b6e3a;
             box-shadow: 0 0 0 2px rgba(11, 110, 58, 0.1);
         }
@@ -282,7 +292,7 @@
         }
 
         /* ============================================
-           BOTÕES - COMPACTOS
+           BOTÕES - COMPACTOS COM ANIMAÇÃO
            ============================================ */
         .btn-primary {
             background: #0b6e3a;
@@ -293,19 +303,101 @@
             font-weight: 600;
             font-size: 0.8rem;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
             width: 100%;
             min-height: 40px;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-primary:active {
-            transform: scale(0.97);
+        .btn-primary .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: rippleAnim 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes rippleAnim {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .btn-primary.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-primary.loading .btn-text {
+            visibility: hidden;
+        }
+
+        .btn-primary.loading .btn-icon {
+            visibility: hidden;
+        }
+
+        .btn-primary .spinner-btn {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            position: absolute;
+        }
+
+        .btn-primary.loading .spinner-btn {
+            display: block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn-primary.success {
+            background: #059669;
+            animation: successPulse 0.5s ease;
+        }
+
+        @keyframes successPulse {
+            0% {
+                transform: scale(1);
+            }
+            30% {
+                transform: scale(1.05);
+            }
+            60% {
+                transform: scale(0.95);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .btn-primary:hover:not(.loading):not(:disabled) {
             background: #0f8b4b;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(11, 110, 58, 0.3);
+        }
+
+        .btn-primary:active:not(.loading):not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -329,7 +421,7 @@
         }
 
         /* ============================================
-           TABELA - ESTILO APP
+           TABELA - ESTILO CARD
            ============================================ */
         .table-wrapper {
             overflow-x: auto;
@@ -341,7 +433,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 0.7rem;
-            min-width: 400px;
+            min-width: 320px;
         }
 
         thead {
@@ -363,94 +455,179 @@
         tbody tr {
             border-bottom: 1px solid var(--border-color);
             transition: var(--transition);
+            display: block;
+            padding: 8px 0;
         }
 
         tbody tr:active {
             background: var(--bg-primary);
         }
 
+        /* Cada linha vira um card */
         tbody td {
-            padding: 6px 8px;
+            display: block;
+            padding: 2px 8px;
             color: var(--text-primary);
-            vertical-align: middle;
             font-size: 0.7rem;
+            border: none;
         }
 
-        /* Descrição com ellipsis */
+        /* Primeira linha: número + descrição */
+        tbody td:first-child {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 2px 8px;
+        }
+
+        .row-number {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.6rem;
+            opacity: 0.6;
+            min-width: 28px;
+            padding-top: 2px;
+        }
+
+        /* DESCRIÇÃO COMPLETA - SEM CORTE */
         .desc-cell {
-            max-width: 100px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1.4;
+            word-break: break-word;
+            flex: 1;
+            color: var(--text-primary);
+        }
+
+        /* Linha de info: Tipo + Preço */
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 2px 8px;
+            margin-top: 2px;
+            flex-wrap: wrap;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.55rem;
+            font-weight: 600;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        .dark .type-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.08);
         }
 
         .price-cell {
-            text-align: right;
             font-weight: 600;
             color: var(--text-price);
-            white-space: nowrap;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
+            margin-left: auto;
         }
 
         .dark .price-cell {
             color: #ffffff !important;
         }
 
-        /* Ações - Ícones pequenos */
-        .actions-cell {
+        /* AÇÕES - ABAIXO DE TUDO */
+        .actions-row {
             display: flex;
-            gap: 3px;
-            flex-wrap: wrap;
-            justify-content: center;
+            gap: 8px;
+            padding: 6px 8px 2px 8px;
+            margin-top: 4px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 8px;
         }
 
-        .btn-edit, .btn-delete {
-            padding: 4px 8px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.6rem;
-            cursor: pointer;
-            transition: var(--transition);
-            min-height: 26px;
-            min-width: 26px;
+        .btn-action {
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.6rem;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 32px;
             -webkit-tap-highlight-color: transparent;
             line-height: 1;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            flex: 1;
         }
 
-        .btn-edit:active, .btn-delete:active {
-            transform: scale(0.9);
+        .btn-action .ripple-action {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(0);
+            animation: rippleAction 0.5s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes rippleAction {
+            to {
+                transform: scale(3);
+                opacity: 0;
+            }
         }
 
         .btn-edit {
-            background: #2563eb;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-edit:hover:not(:active) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
         }
 
         .btn-edit:active {
-            background: #1d4ed8;
+            transform: scale(0.94);
+        }
+
+        .btn-edit .icon-edit {
+            font-size: 0.7rem;
         }
 
         .btn-delete {
-            background: #dc2626;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
             color: white;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+        }
+
+        .btn-delete:hover:not(:active) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
         }
 
         .btn-delete:active {
-            background: #b91c1c;
+            transform: scale(0.94);
         }
 
-        /* Número da linha */
-        .row-number {
-            color: var(--text-secondary);
-            font-weight: 500;
-            text-align: center;
-            font-size: 0.6rem;
-            opacity: 0.6;
+        .btn-delete .icon-delete {
+            font-size: 0.7rem;
+        }
+
+        /* Esconder cabeçalho da tabela no mobile */
+        thead {
+            display: none;
         }
 
         /* ============================================
@@ -573,21 +750,36 @@
             justify-content: center;
         }
 
-        .toast-success { background: #0b6e3a; }
-        .toast-error { background: #dc2626; }
-        .toast-info { background: #2563eb; }
+        .toast-success {
+            background: #0b6e3a;
+        }
+        .toast-error {
+            background: #dc2626;
+        }
+        .toast-info {
+            background: #2563eb;
+        }
 
         .toast .toast-icon {
             font-size: 0.9rem;
         }
 
         @keyframes slideInToast {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         @keyframes fadeOutToast {
-            to { transform: translateY(20px); opacity: 0; }
+            to {
+                transform: translateY(20px);
+                opacity: 0;
+            }
         }
 
         .toast.fade-out {
@@ -611,10 +803,6 @@
             border-top-color: #0b6e3a;
             border-radius: 50%;
             animation: spin 0.7s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
 
         #loadingSpinner p {
@@ -685,34 +873,24 @@
                 flex: 0 0 auto;
             }
 
-            .btn-export, .btn-refresh {
+            .btn-export,
+            .btn-refresh {
                 flex: 0 0 auto;
                 padding: 6px 16px;
             }
 
-            table {
-                font-size: 0.75rem;
-                min-width: unset;
-            }
-
-            thead th, tbody td {
-                padding: 8px 12px;
+            tbody tr {
+                padding: 10px 0;
             }
 
             .desc-cell {
-                max-width: 200px;
-                white-space: nowrap;
+                font-size: 0.8rem;
             }
 
-            .actions-cell {
-                gap: 4px;
-            }
-
-            .btn-edit, .btn-delete {
-                padding: 4px 10px;
+            .btn-action {
+                padding: 8px 20px;
                 font-size: 0.65rem;
-                min-height: 28px;
-                min-width: 28px;
+                min-height: 34px;
             }
 
             .toast-container {
@@ -722,6 +900,11 @@
                 transform: none;
                 width: auto;
                 max-width: 380px;
+            }
+
+            .actions-row {
+                padding: 8px 8px 2px 8px;
+                gap: 10px;
             }
         }
 
@@ -748,74 +931,63 @@
                 grid-template-columns: 1fr 1fr 1fr;
             }
 
-            table {
-                font-size: 0.8rem;
-            }
-
-            thead th, tbody td {
-                padding: 10px 16px;
-            }
-
-            .desc-cell {
-                max-width: 300px;
-            }
-
-            .btn-edit, .btn-delete {
-                padding: 6px 14px;
-                font-size: 0.7rem;
-                min-height: 32px;
-                min-width: 32px;
-            }
-
-            .btn-primary, .btn-secondary {
+            .btn-primary,
+            .btn-secondary {
                 width: auto;
                 min-width: 120px;
                 min-height: 40px;
                 padding: 10px 24px;
             }
 
-            .row-number {
+            .desc-cell {
+                font-size: 0.85rem;
+            }
+
+            .price-cell {
+                font-size: 0.8rem;
+            }
+
+            .btn-action {
+                padding: 8px 24px;
                 font-size: 0.7rem;
+                min-height: 36px;
+                border-radius: 10px;
+            }
+
+            tbody tr {
+                padding: 12px 0;
+            }
+
+            .actions-row {
+                padding: 10px 8px 2px 8px;
+                gap: 12px;
             }
         }
 
-        /* ============================================
-           ESTILOS ADICIONAIS
-           ============================================ */
-        .type-badge {
-            display: inline-block;
-            padding: 1px 8px;
-            border-radius: 12px;
-            font-size: 0.55rem;
-            font-weight: 600;
-            background: var(--bg-primary);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-        }
+        /* Celular pequeno */
+        @media (max-width: 400px) {
+            .btn-action {
+                padding: 5px 10px;
+                font-size: 0.55rem;
+                min-height: 28px;
+                gap: 4px;
+            }
 
-        @media (min-width: 480px) {
-            .type-badge {
+            .btn-action .icon-edit,
+            .btn-action .icon-delete {
                 font-size: 0.6rem;
-                padding: 2px 10px;
             }
-        }
 
-        .dark .type-badge {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.08);
-        }
-
-        /* Célula de tipo mais compacta */
-        .type-cell {
-            white-space: nowrap;
-            font-size: 0.6rem;
-        }
-
-        @media (min-width: 480px) {
-            .type-cell {
+            .desc-cell {
                 font-size: 0.7rem;
+            }
+
+            .price-cell {
+                font-size: 0.7rem;
+            }
+
+            .info-row {
+                gap: 8px;
             }
         }
     </style>
@@ -865,11 +1037,27 @@
                     </div>
                     <div class="form-group">
                         <label for="prodType">Tipo</label>
-                        <input type="text" id="prodType" placeholder="Ex: Unidade" />
+                        <select id="prodType">
+                            <option value="">Selecione...</option>
+                            <option value="LITRO">LITRO</option>
+                            <option value="KG">KG</option>
+                            <option value="UNIDADE">UNIDADE</option>
+                            <option value="TONELADA">TONELADA</option>
+                            <option value="GALÃO">GALÃO</option>
+                            <option value="CAIXA">CAIXA</option>
+                            <option value="PACOTE">PACOTE</option>
+                            <option value="FRASCO">FRASCO</option>
+                            <option value="BOMBA">BOMBA</option>
+                            <option value="OUTRO">OUTRO</option>
+                        </select>
                     </div>
                     <div class="full-width">
                         <div class="btn-row">
-                            <button type="submit" class="btn-primary">💾 Salvar</button>
+                            <button type="submit" class="btn-primary" id="saveBtn">
+                                <span class="btn-icon">💾</span>
+                                <span class="btn-text" id="btnText">Salvar</span>
+                                <span class="spinner-btn"></span>
+                            </button>
                             <button type="button" onclick="resetForm()" class="btn-secondary">Cancelar</button>
                             <input type="hidden" id="editIndex" value="-1" />
                         </div>
@@ -904,16 +1092,16 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width:28px;">#</th>
+                            <th>#</th>
                             <th>Descrição</th>
                             <th>Tipo</th>
-                            <th style="text-align:right; width:70px;">Preço</th>
-                            <th style="text-align:center; width:70px;">Ações</th>
+                            <th>Preço</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
                         <tr>
-                            <td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem;">
+                            <td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem; display:block;">
                                 Nenhum produto cadastrado
                             </td>
                         </tr>
@@ -928,7 +1116,7 @@
     ============================================ -->
     <script>
         // ============================================
-        // CONFIG - URL DO GOOGLE APPS SCRIPT
+        // CONFIG - ATUALIZE COM SUA URL
         // ============================================
         const GOOGLE_SCRIPT_URL =
             "https://script.google.com/macros/s/AKfycbwjyb67ypHFuGT_68-lHd1Rymk_TMy3ggAchrRr_4-6WppCSuZfDeH1TvRHKZemBr8I/exec";
@@ -946,6 +1134,8 @@
         const productCountDetail = document.getElementById('productCountDetail');
         const searchInput = document.getElementById('searchInput');
         const loadingSpinner = document.getElementById('loadingSpinner');
+        const saveBtn = document.getElementById('saveBtn');
+        const btnText = document.getElementById('btnText');
 
         const prodDesc = document.getElementById('prodDesc');
         const prodPrice = document.getElementById('prodPrice');
@@ -997,83 +1187,50 @@
         }
 
         // ============================================
-        // API - BUSCA DA PLANILHA
+        // API - SEM DADOS DE EXEMPLO
         // ============================================
         async function loadProducts() {
             loadingSpinner.style.display = 'block';
             tableBody.innerHTML =
-                `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem;">Carregando da planilha...</td></tr>`;
+                `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem; display:block;">Carregando...</td></tr>`;
 
             try {
-                const url = `${GOOGLE_SCRIPT_URL}?action=getProducts&t=${Date.now()}`;
-                console.log('🔍 Buscando produtos da planilha (admin):', url);
-                
-                const res = await fetch(url, {
+                const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getProducts&t=${Date.now()}`, {
                     mode: 'cors',
                     headers: {
                         'Accept': 'application/json',
                     }
                 });
-                
-                console.log('📡 Status:', res.status);
-                
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
                 const data = await res.json();
-                console.log('📄 Dados recebidos:', data);
-                
                 if (data?.status === 'success' && Array.isArray(data.products)) {
                     products = data.products.map(p => {
                         if (Array.isArray(p)) {
                             return {
-                                description: String(p[0] || "").trim(),
+                                description: p[0] || '',
                                 price: parseFloat(String(p[1] || '').replace(',', '.')) || 0,
-                                type: String(p[2] || "").trim()
+                                type: p[2] || ''
                             };
                         }
                         if (typeof p === 'object') {
-                            const desc = p.descricao || p.Descrição || p.description || p.DESCRICAO || "";
-                            const preco = p.preco || p.Preço || p.PRECO || p.price || "";
-                            const tipo = p.tipo || p.Tipo || p.TIPO || p.type || "";
                             return {
-                                description: String(desc).trim(),
-                                price: parseFloat(String(preco).replace(',', '.')) || 0,
-                                type: String(tipo).trim()
+                                description: String(p.descricao || p.Descrição || p.description || p.DESCRICAO || '')
+                                    .trim(),
+                                price: parseFloat(String(p.preco || p.Preço || p.PRECO || p.price || '').replace(',',
+                                    '.')) || 0,
+                                type: String(p.tipo || p.Tipo || p.TIPO || p.type || '').trim()
                             };
                         }
                         return { description: '', price: 0, type: '' };
-                    }).filter(p => p.description && p.description !== '');
-                    
-                    if (products.length > 0) {
-                        showToast(`✅ ${products.length} produtos carregados da planilha!`, 'success');
-                        console.log('✅ Produtos carregados:', products);
-                    } else {
-                        throw new Error('Nenhum produto válido encontrado na planilha');
-                    }
+                    }).filter(p => p.description && p.description.trim() !== '');
                 } else {
-                    throw new Error(data?.message || 'Dados inválidos da planilha');
+                    throw new Error(data?.message || 'Dados inválidos');
                 }
             } catch (err) {
-                console.error('❌ Erro ao carregar produtos:', err);
-                
-                // NÃO USA DADOS HARCODED - APENAS MOSTRA ERRO
+                console.warn('Erro ao carregar:', err);
+                showToast('Erro ao carregar produtos da planilha', 'error');
                 products = [];
-                showToast(`❌ Erro ao carregar: ${err.message}`, 'error');
-                
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align:center; padding:20px 10px;">
-                            <div style="color:var(--text-secondary); font-size:0.7rem;">
-                                <span style="font-size:1.5rem; display:block; margin-bottom:4px;">⚠️</span>
-                                <p style="font-weight:600; color:var(--text-primary);">Erro ao carregar produtos</p>
-                                <p style="font-size:0.65rem; margin-top:2px;">${escapeHtml(err.message)}</p>
-                                <button onclick="loadProducts()" style="margin-top:8px; padding:4px 16px; border-radius:20px; border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); cursor:pointer; font-size:0.7rem;">
-                                    🔄 Tentar novamente
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
             } finally {
                 loadingSpinner.style.display = 'none';
                 renderTable();
@@ -1081,35 +1238,28 @@
             }
         }
 
-        // ============================================
-        // API - SALVAR NA PLANILHA
-        // ============================================
         async function saveProduct(product, isEdit = false, index = -1) {
             const action = isEdit ? 'updateProduct' : 'addProduct';
             const payload = { action, product, index };
 
             try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
-                showToast(isEdit ? '✅ Produto atualizado!' : '✅ Produto cadastrado!', 'success');
+                showToast(isEdit ? 'Produto atualizado!' : 'Produto cadastrado!', 'success');
                 await loadProducts();
                 resetForm();
                 return true;
             } catch (err) {
                 console.error('Erro ao salvar:', err);
-                showToast('❌ Erro ao salvar produto', 'error');
+                showToast('Erro ao salvar produto', 'error');
                 return false;
             }
         }
 
-        // ============================================
-        // API - EXCLUIR DA PLANILHA
-        // ============================================
         async function deleteProduct(index) {
             if (!confirm('Excluir este produto?')) return;
 
@@ -1120,42 +1270,26 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'deleteProduct', index })
                 });
-                showToast('🗑️ Produto excluído!', 'success');
+                showToast('Produto excluído!', 'success');
                 await loadProducts();
             } catch (err) {
                 console.error('Erro ao excluir:', err);
-                showToast('❌ Erro ao excluir produto', 'error');
+                showToast('Erro ao excluir produto', 'error');
             }
         }
 
         // ============================================
-        // RENDER TABLE
+        // RENDER TABLE - FORMATO CARD
         // ============================================
         function renderTable(filter = '') {
-            if (!products || products.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem;">
-                            Nenhum produto cadastrado na planilha
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
             const filtered = products.filter(p =>
                 p.description.toLowerCase().includes(filter.toLowerCase()) ||
                 (p.type || '').toLowerCase().includes(filter.toLowerCase())
             );
 
             if (filtered.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem;">
-                            Nenhum resultado encontrado
-                        </td>
-                    </tr>
-                `;
+                tableBody.innerHTML =
+                    `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary); padding:20px 10px; font-size:0.7rem; display:block;">${products.length === 0 ? 'Nenhum produto cadastrado' : 'Nenhum resultado encontrado'}</td></tr>`;
                 return;
             }
 
@@ -1163,15 +1297,23 @@
                 const realIndex = products.indexOf(p);
                 return `
                     <tr>
-                        <td class="row-number">${String(idx + 1).padStart(2, '0')}</td>
-                        <td><span class="desc-cell" title="${escapeHtml(p.description)}">${escapeHtml(p.description)}</span></td>
-                        <td class="type-cell"><span class="type-badge">${escapeHtml(p.type || '-')}</span></td>
-                        <td class="price-cell">${p.price > 0 ? 'R$ ' + formatPrice(p.price) : '-'}</td>
-                        <td style="text-align:center;">
-                            <div class="actions-cell">
-                                <button onclick="editProduct(${realIndex})" class="btn-edit" title="Editar">✏️</button>
-                                <button onclick="deleteProduct(${realIndex})" class="btn-delete" title="Excluir">🗑️</button>
-                            </div>
+                        <td>
+                            <span class="row-number">${String(idx + 1).padStart(2, '0')}</span>
+                            <span class="desc-cell">${escapeHtml(p.description)}</span>
+                        </td>
+                        <td class="info-row">
+                            <span class="type-badge">${escapeHtml(p.type || '-')}</span>
+                            <span class="price-cell">${p.price > 0 ? 'R$ ' + formatPrice(p.price) : '-'}</span>
+                        </td>
+                        <td class="actions-row">
+                            <button onclick="editProduct(${realIndex})" class="btn-action btn-edit">
+                                <span class="icon-edit">✏️</span>
+                                <span>Editar</span>
+                            </button>
+                            <button onclick="deleteProduct(${realIndex})" class="btn-action btn-delete">
+                                <span class="icon-delete">🗑️</span>
+                                <span>Excluir</span>
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -1198,6 +1340,9 @@
             editIndex.value = '-1';
             formTitle.textContent = 'Cadastrar Produto';
             formIcon.textContent = '✏️';
+            btnText.textContent = 'Salvar';
+            saveBtn.classList.remove('loading', 'success');
+            saveBtn.disabled = false;
             prodDesc.focus();
         }
 
@@ -1210,12 +1355,57 @@
             editIndex.value = index;
             formTitle.textContent = 'Editar Produto';
             formIcon.textContent = '✏️';
+            btnText.textContent = 'Atualizar';
+            saveBtn.classList.remove('loading', 'success');
+            saveBtn.disabled = false;
             prodDesc.focus();
             prodDesc.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
+        // ============================================
+        // BOTÃO COM ANIMAÇÃO - EFEITO RIPPLE
+        // ============================================
+        function createRipple(e) {
+            const btn = e.currentTarget;
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            const rect = btn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            btn.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        saveBtn.addEventListener('click', createRipple);
+
+        // ============================================
+        // EFEITO RIPPLE PARA BOTÕES DE AÇÃO
+        // ============================================
+        function createActionRipple(e) {
+            const btn = e.currentTarget;
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple-action');
+            const rect = btn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            btn.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 500);
+        }
+
+        // ============================================
+        // HANDLE SAVE COM ANIMAÇÃO
+        // ============================================
         async function handleSaveProduct(e) {
             e.preventDefault();
+
             const desc = prodDesc.value.trim();
             const price = parseFloat(prodPrice.value.replace(',', '.')) || 0;
             const type = prodType.value.trim();
@@ -1227,16 +1417,43 @@
                 return;
             }
 
+            saveBtn.classList.add('loading');
+            saveBtn.disabled = true;
+            const isEdit = idx >= 0 && idx < products.length;
+            btnText.textContent = isEdit ? 'Atualizando...' : 'Salvando...';
+
             const product = { description: desc, price, type };
 
-            if (idx >= 0 && idx < products.length) {
-                await saveProduct(product, true, idx);
-            } else {
-                if (products.some(p => p.description.toLowerCase() === desc.toLowerCase())) {
-                    showToast('Produto já existe!', 'error');
-                    return;
+            try {
+                if (isEdit) {
+                    await saveProduct(product, true, idx);
+                } else {
+                    if (products.some(p => p.description.toLowerCase() === desc.toLowerCase())) {
+                        showToast('Produto já existe!', 'error');
+                        saveBtn.classList.remove('loading');
+                        saveBtn.disabled = false;
+                        btnText.textContent = isEdit ? 'Atualizar' : 'Salvar';
+                        return;
+                    }
+                    await saveProduct(product, false);
                 }
-                await saveProduct(product, false);
+
+                saveBtn.classList.remove('loading');
+                saveBtn.classList.add('success');
+                btnText.textContent = '✓ Salvo!';
+
+                setTimeout(() => {
+                    saveBtn.classList.remove('success');
+                    saveBtn.disabled = false;
+                    btnText.textContent = isEdit ? 'Atualizar' : 'Salvar';
+                }, 1500);
+
+            } catch (err) {
+                console.error('Erro:', err);
+                saveBtn.classList.remove('loading');
+                saveBtn.disabled = false;
+                btnText.textContent = isEdit ? 'Atualizar' : 'Salvar';
+                showToast('Erro ao salvar produto', 'error');
             }
         }
 
@@ -1289,8 +1506,15 @@
         });
 
         // ============================================
-        // INIT
+        // INIT - Adiciona ripple nos botões de ação
         // ============================================
+        document.addEventListener('click', function(e) {
+            const actionBtn = e.target.closest('.btn-action');
+            if (actionBtn) {
+                createActionRipple({ currentTarget: actionBtn, clientX: e.clientX, clientY: e.clientY });
+            }
+        });
+
         loadProducts();
     </script>
 </body>
