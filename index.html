@@ -916,6 +916,7 @@
         carrinho = [];
         renderizarCarrinho();
         atualizarUI();
+        mostrarBanner('🗑️ Carrinho limpo!', true);
     }
 
     function renderizarCarrinho() {
@@ -1125,7 +1126,7 @@
     }
 
     // ============================================================
-    // FINALIZAR PEDIDO
+    // FINALIZAR PEDIDO (NÃO LIMPA O CARRINHO)
     // ============================================================
     async function finalizarPedido(event) {
         if (event) criarRipple(event);
@@ -1155,7 +1156,7 @@
             
             if (result && result.status === 'success') {
                 pedidos.push(pedido);
-                carrinho = [];
+                // NÃO LIMPA O CARRINHO - mantém os itens
                 fecharCarrinho();
                 atualizarTodasTelas();
                 abrirModalPdf(pedido);
@@ -1166,7 +1167,7 @@
         } catch (error) {
             console.error('❌ Erro ao finalizar pedido:', error);
             pedidos.push(pedido);
-            carrinho = [];
+            // NÃO LIMPA O CARRINHO
             fecharCarrinho();
             atualizarTodasTelas();
             abrirModalPdf(pedido);
@@ -1175,7 +1176,7 @@
     }
 
     // ============================================================
-    // ENVIAR WHATSAPP
+    // ENVIAR WHATSAPP (SEMPRE SEM PREÇOS)
     // ============================================================
     function enviarWhatsApp(event) {
         if (event) criarRipple(event);
@@ -1184,7 +1185,6 @@
             return;
         }
 
-        const total = getTotalCarrinho();
         const totalItens = carrinho.reduce((s, i) => s + (i.quantidade || 0), 0);
         const now = new Date().toLocaleString('pt-BR');
 
@@ -1193,19 +1193,19 @@
         msg += `👤 Cliente: ${CLIENTE_FIXO}\n`;
         msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
 
+        // SEM PREÇOS - apenas produtos e quantidades
         carrinho.forEach((item, idx) => {
-            msg += `*${idx+1}.* ${item.nome}\n`;
-            msg += `   Qtd: ${(item.quantidade || 0).toFixed(1)}${item.tipo ? ` · ${item.tipo}` : ''}\n`;
-            msg += `   R$ ${item.preco.toFixed(2)} = R$ ${(item.preco * (item.quantidade || 0)).toFixed(2)}\n\n`;
+            msg += `*${String(idx+1).padStart(2, '0')}.* ${item.nome}\n`;
+            msg += `   Qtd: ${(item.quantidade || 0).toFixed(1)}${item.tipo ? ` · ${item.tipo}` : ''}\n\n`;
         });
 
         msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-        msg += `📦 *Total Itens:* ${totalItens.toFixed(1)}\n`;
-        msg += `💰 *TOTAL:* R$ ${total.toFixed(2)}\n\n`;
+        msg += `📦 *Total Itens:* ${totalItens.toFixed(1)}\n\n`;
         msg += `_✅ Pedido gerado pelo sistema Ivo Pita_`;
 
         fecharCarrinho();
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+        mostrarBanner('📱 WhatsApp aberto!', true);
     }
 
     // ============================================================
@@ -1397,10 +1397,8 @@
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.btn-ripple');
             if (btn) {
-                // Se o botão já tem um handler, não adicionar outro
                 if (!btn.dataset.ripple) {
                     btn.dataset.ripple = 'true';
-                    // O ripple será acionado pelo handler específico
                 }
             }
         });
@@ -1409,16 +1407,16 @@
     }
 
     document.addEventListener('DOMContentLoaded', init);
-    
     </script>
-   
-   <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('✅ SW registrado!'))
-      .catch(err => console.warn('⚠️ Erro SW:', err));
-  }
-</script>
-</body>
 
+    <!-- REGISTRO DO SERVICE WORKER -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('✅ SW registrado!'))
+                .catch(err => console.warn('⚠️ Erro SW:', err));
+        }
+    </script>
+
+</body>
 </html>
