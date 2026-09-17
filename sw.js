@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ivo-pita-v1';
+const CACHE_NAME = 'ivo-pita-v2';
 const ASSETS = [
   'index.html',
   'admin.html',
