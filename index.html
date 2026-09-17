@@ -275,13 +275,55 @@
         .product-qty .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid var(--slate-200); background: var(--branco); color: var(--slate-700); font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; line-height: 1; padding: 0; user-select: none; font-family: 'Inter', sans-serif; }
         .product-qty .qty-btn:hover { border-color: var(--verde); color: var(--verde); background: var(--verde-bg); }
         .product-qty .qty-btn:active { transform: scale(0.9); background: var(--verde); color: #fff; border-color: var(--verde); }
-        .product-qty .qty-value { width: 42px; height: 28px; border: 1.5px solid var(--slate-200); border-radius: 8px; text-align: center; font-size: 13px; font-weight: 700; color: var(--slate-800); background: var(--branco); padding: 0 2px; -moz-appearance: textfield; appearance: textfield; font-family: 'Inter', sans-serif; }
+        .product-qty .qty-value { width: 48px; height: 28px; border: 1.5px solid var(--slate-200); border-radius: 8px; text-align: center; font-size: 13px; font-weight: 700; color: var(--slate-800); background: var(--branco); padding: 0 2px; -moz-appearance: textfield; appearance: textfield; font-family: 'Inter', sans-serif; }
         .product-qty .qty-value::-webkit-outer-spin-button,
         .product-qty .qty-value::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .product-qty .qty-value:focus { outline: none; border-color: var(--verde); box-shadow: 0 0 0 2px rgba(11,110,58,0.12); }
         .product-card .btn-add-cart { width: 100%; padding: 7px 8px; border: none; border-radius: 8px; background: var(--verde); color: #fff; font-weight: 700; font-size: 11px; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.15s; margin-top: 2px; }
         .product-card .btn-add-cart:hover { background: var(--verde-escuro); }
         .product-card .btn-add-cart:active { transform: scale(0.96); animation: pulse 0.3s ease; }
+
+        /* ===== CARD SELECIONADO (PRODUTO NO CARRINHO) ===== */
+        .product-card.no-carrinho {
+            border-color: var(--verde);
+            background: var(--verde-bg);
+            box-shadow: 0 4px 16px rgba(11,110,58,0.18);
+        }
+        .dark .product-card.no-carrinho {
+            background: rgba(11,110,58,0.15);
+        }
+        .product-card.no-carrinho .product-image {
+            background: rgba(255,255,255,0.5);
+        }
+        .product-card.no-carrinho .product-name {
+            color: var(--verde-escuro);
+        }
+        .product-card .badge-carrinho {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: var(--verde);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 9px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            box-shadow: 0 2px 6px rgba(11,110,58,0.35);
+            animation: pop 0.3s ease;
+            z-index: 2;
+        }
+        .product-card.no-carrinho .product-badge {
+            background: var(--verde-escuro);
+        }
+        .product-card.no-carrinho .btn-add-cart {
+            background: var(--verde-escuro);
+        }
+        .product-card.no-carrinho .btn-add-cart:hover {
+            background: var(--verde);
+        }
 
         /* ===== BOTÕES ===== */
         .btn-primary, .btn-clean, .btn-success, .btn-warning, .btn-danger, .btn-pdf { padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 12px; justify-content: center; min-height: 40px; position: relative; overflow: hidden; }
@@ -383,7 +425,7 @@
             .product-name { font-size: 11px; }
             .product-price { font-size: 13px; }
             .product-qty .qty-btn { width: 26px; height: 26px; font-size: 14px; }
-            .product-qty .qty-value { width: 36px; height: 26px; font-size: 12px; }
+            .product-qty .qty-value { width: 40px; height: 26px; font-size: 12px; }
             .product-card .btn-add-cart { font-size: 10px; padding: 6px 6px; }
             .cart-item-actions .qty-input { width: 55px; font-size: 12px; padding: 4px 6px; }
             .btn-primary, .btn-clean, .btn-success, .btn-warning, .btn-danger, .btn-pdf { font-size: 11px; padding: 8px 12px; min-height: 34px; }
@@ -408,51 +450,6 @@
         .venda-header .page-header { margin-bottom: 0; }
         
         .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--slate-200); border-top-color: var(--verde); border-radius: 50%; animation: spin 0.6s linear infinite; }
-    
-        /* ===== CARD SELECIONADO (PRODUTO NO CARRINHO) ===== */
-.product-card.no-carrinho {
-    border-color: var(--verde);
-    background: var(--verde-bg);
-    box-shadow: 0 4px 16px rgba(11,110,58,0.18);
-}
-.dark .product-card.no-carrinho {
-    background: rgba(11,110,58,0.15);
-}
-.product-card.no-carrinho .product-image {
-    background: rgba(255,255,255,0.5);
-}
-.product-card.no-carrinho .product-name {
-    color: var(--verde-escuro);
-}
-/* Badge de "adicionado" */
-.product-card .badge-carrinho {
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    background: var(--verde);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 3px 9px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    box-shadow: 0 2px 6px rgba(11,110,58,0.35);
-    animation: pop 0.3s ease;
-    z-index: 2;
-}
-/* Quando o card está no carrinho, o badge "LITRO/KG" fica mais escuro */
-.product-card.no-carrinho .product-badge {
-    background: var(--verde-escuro);
-}
-/* Botão Adicionar muda quando o produto já está no carrinho */
-.product-card.no-carrinho .btn-add-cart {
-    background: var(--verde-escuro);
-}
-.product-card.no-carrinho .btn-add-cart:hover {
-    background: var(--verde);
-}
     </style>
 </head>
 
@@ -729,7 +726,7 @@
     let produtos = [];
     let pedidos = [];
     let carrinho = [];
-    let quantidadesSelecionadas = {};   // ✅ Declarado UMA ÚNICA VEZ aqui
+    let quantidadesSelecionadas = {};   // Guarda a quantidade escolhida por produto antes de adicionar
     let graficoPizzaInstance = null;
     let graficoBarrasInstance = null;
 
@@ -878,92 +875,57 @@
     }
 
     function renderizarProdutos() {
-    const grid = document.getElementById('productGrid');
-    if (!grid) return;
+        const grid = document.getElementById('productGrid');
+        if (!grid) return;
 
-    if (produtos.length === 0) {
-        grid.innerHTML = '<p style="text-align:center;color:var(--slate-500);padding:16px;font-weight:500;font-size:13px;">Nenhum produto disponível</p>';
-        return;
+        if (produtos.length === 0) {
+            grid.innerHTML = '<p style="text-align:center;color:var(--slate-500);padding:16px;font-weight:500;font-size:13px;">Nenhum produto disponível</p>';
+            return;
+        }
+
+        grid.innerHTML = produtos.map(produto => {
+            const qtd = getQtdSelecionada(produto.id);
+            const noCarrinho = carrinho.find(i => i.produtoId === produto.id);
+            const qtdNoCarrinho = noCarrinho ? (noCarrinho.quantidade || 0) : 0;
+
+            return `
+                <div class="product-card ${noCarrinho ? 'no-carrinho' : ''}" data-id="${produto.id}">
+                    ${noCarrinho ? `<div class="badge-carrinho">✓ ${qtdNoCarrinho.toFixed(1)}</div>` : ''}
+                    <img src="${produto.imagem}" alt="${produto.nome}" class="product-image" />
+                    <div class="product-name">${produto.nome}</div>
+                    <div class="product-price">R$ ${(produto.preco || 0).toFixed(2)}</div>
+                    ${produto.tipo ? `<div class="product-badge">${produto.tipo}</div>` : ''}
+
+                    <div class="product-qty">
+                        <button type="button" class="qty-btn" onclick="alterarQtdProduto('${produto.id}', -1)" title="Diminuir">−</button>
+                        <input type="number" class="qty-value" 
+                               value="${qtd.toFixed(1)}" 
+                               step="0.1" min="0.1"
+                               onchange="definirQtdProduto('${produto.id}', this.value)"
+                               onfocus="this.select()" />
+                        <button type="button" class="qty-btn" onclick="alterarQtdProduto('${produto.id}', 1)" title="Aumentar">+</button>
+                    </div>
+
+                    <button type="button" class="btn-add-cart" onclick="adicionarAoCarrinhoComQtd('${produto.id}')">
+                        <i class="fas fa-cart-plus"></i> ${noCarrinho ? 'Adicionar mais' : 'Adicionar'}
+                    </button>
+                </div>
+            `;
+        }).join('');
     }
 
-    grid.innerHTML = produtos.map(produto => {
-        const qtd = getQtdSelecionada(produto.id);
-        const noCarrinho = carrinho.find(i => i.produtoId === produto.id);
-        const qtdNoCarrinho = noCarrinho ? (noCarrinho.quantidade || 0) : 0;
-
-        return `
-            <div class="product-card ${noCarrinho ? 'no-carrinho' : ''}" data-id="${produto.id}">
-                ${noCarrinho ? `<div class="badge-carrinho">✓ ${qtdNoCarrinho.toFixed(1)}</div>` : ''}
-                <img src="${produto.imagem}" alt="${produto.nome}" class="product-image" />
-                <div class="product-name">${produto.nome}</div>
-                <div class="product-price">R$ ${(produto.preco || 0).toFixed(2)}</div>
-                ${produto.tipo ? `<div class="product-badge">${produto.tipo}</div>` : ''}
-
-                <div class="product-qty">
-                    <button type="button" class="qty-btn" onclick="alterarQtdProduto('${produto.id}', -1)" title="Diminuir">−</button>
-                    <input type="number" class="qty-value" 
-                           value="${qtd.toFixed(1)}" 
-                           step="0.5" min="0.5"
-                           onchange="definirQtdProduto('${produto.id}', this.value)"
-                           onfocus="this.select()" />
-                    <button type="button" class="qty-btn" onclick="alterarQtdProduto('${produto.id}', 1)" title="Aumentar">+</button>
-                </div>
-
-                <button type="button" class="btn-add-cart" onclick="adicionarAoCarrinhoComQtd('${produto.id}')">
-                    <i class="fas fa-cart-plus"></i> ${noCarrinho ? 'Adicionar mais' : 'Adicionar'}
-                </button>
-            </div>
-        `;
-    }).join('');
-}
-
-// Atualiza SOMENTE o estado visual dos cards (sem redesenhar tudo)
-function atualizarEstadoCards() {
-    produtos.forEach(produto => {
-        const card = document.querySelector(`.product-card[data-id="${produto.id}"]`);
-        if (!card) return;
-
-        const item = carrinho.find(i => i.produtoId === produto.id);
-        const qtdNoCarrinho = item ? (item.quantidade || 0) : 0;
-
-        // Remove ou adiciona a classe
-        if (item) {
-            card.classList.add('no-carrinho');
-        } else {
-            card.classList.remove('no-carrinho');
-        }
-
-        // Atualiza ou remove o badge "✓ X un."
-        let badge = card.querySelector('.badge-carrinho');
-        if (item) {
-            if (!badge) {
-                badge = document.createElement('div');
-                badge.className = 'badge-carrinho';
-                card.insertBefore(badge, card.firstChild);
-            }
-            badge.textContent = `✓ ${qtdNoCarrinho.toFixed(1)}`;
-        } else if (badge) {
-            badge.remove();
-        }
-
-        // Atualiza o texto do botão
-        const btn = card.querySelector('.btn-add-cart');
-        if (btn) {
-            btn.innerHTML = `<i class="fas fa-cart-plus"></i> ${item ? 'Adicionar mais' : 'Adicionar'}`;
-        }
-    });
-}
-
     function alterarQtdProduto(produtoId, delta) {
-        let qtd = getQtdSelecionada(produtoId) + delta;
-        if (qtd < 0.5) qtd = 0.5;
+        let qtd = getQtdSelecionada(produtoId) + (delta * 0.1);
+        qtd = Math.round(qtd * 10) / 10;   // evita bugs de ponto flutuante
+        if (qtd < 0.1) qtd = 0.1;
         quantidadesSelecionadas[produtoId] = qtd;
         atualizarQtdNaTela(produtoId, qtd);
     }
 
     function definirQtdProduto(produtoId, valor) {
         let qtd = parseFloat(valor);
-        if (isNaN(qtd) || qtd < 0.5) qtd = 0.5;
+        if (isNaN(qtd) || qtd < 0.1) qtd = 0.1;
+        qtd = Math.round(qtd * 10) / 10;
         quantidadesSelecionadas[produtoId] = qtd;
         atualizarQtdNaTela(produtoId, qtd);
     }
@@ -979,34 +941,70 @@ function atualizarEstadoCards() {
     // ADICIONAR AO CARRINHO (USANDO A QUANTIDADE ESCOLHIDA)
     // ============================================================
     function adicionarAoCarrinhoComQtd(produtoId) {
-    const produto = produtos.find(p => p.id === produtoId);
-    if (!produto) return;
+        const produto = produtos.find(p => p.id === produtoId);
+        if (!produto) return;
 
-    const qtd = getQtdSelecionada(produtoId);
+        const qtd = getQtdSelecionada(produtoId);
 
-    const itemExistente = carrinho.find(item => item.produtoId === produtoId);
-    if (itemExistente) {
-        itemExistente.quantidade = (itemExistente.quantidade || 0) + qtd;
-    } else {
-        carrinho.push({
-            produtoId: produto.id,
-            nome: produto.nome,
-            preco: produto.preco || 0,
-            tipo: produto.tipo || '',
-            imagem: produto.imagem || '',
-            quantidade: qtd
-        });
+        const itemExistente = carrinho.find(item => item.produtoId === produtoId);
+        if (itemExistente) {
+            itemExistente.quantidade = (itemExistente.quantidade || 0) + qtd;
+            itemExistente.quantidade = Math.round(itemExistente.quantidade * 10) / 10;
+        } else {
+            carrinho.push({
+                produtoId: produto.id,
+                nome: produto.nome,
+                preco: produto.preco || 0,
+                tipo: produto.tipo || '',
+                imagem: produto.imagem || '',
+                quantidade: qtd
+            });
+        }
+
+        // Reseta a quantidade selecionada para 1 após adicionar
+        quantidadesSelecionadas[produtoId] = 1;
+        atualizarQtdNaTela(produtoId, 1);
+
+        renderizarCarrinho();
+        atualizarUI();
+        atualizarEstadoCards();
+        if (navigator.vibrate) navigator.vibrate(10);
+        mostrarBanner(`✅ ${produto.nome} (${qtd.toFixed(1)}) adicionado!`, true);
     }
 
-    quantidadesSelecionadas[produtoId] = 1;
-    atualizarQtdNaTela(produtoId, 1);
+    // Atualiza o estado visual dos cards (verde + badge) sem redesenhar tudo
+    function atualizarEstadoCards() {
+        produtos.forEach(produto => {
+            const card = document.querySelector(`.product-card[data-id="${produto.id}"]`);
+            if (!card) return;
 
-    renderizarCarrinho();
-    atualizarUI();
-    atualizarEstadoCards();   // 👈 ADICIONE ESTA LINHA
-    if (navigator.vibrate) navigator.vibrate(10);
-    mostrarBanner(`✅ ${produto.nome} (${qtd.toFixed(1)}) adicionado!`, true);
-}
+            const item = carrinho.find(i => i.produtoId === produto.id);
+            const qtdNoCarrinho = item ? (item.quantidade || 0) : 0;
+
+            if (item) {
+                card.classList.add('no-carrinho');
+            } else {
+                card.classList.remove('no-carrinho');
+            }
+
+            let badge = card.querySelector('.badge-carrinho');
+            if (item) {
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.className = 'badge-carrinho';
+                    card.insertBefore(badge, card.firstChild);
+                }
+                badge.textContent = `✓ ${qtdNoCarrinho.toFixed(1)}`;
+            } else if (badge) {
+                badge.remove();
+            }
+
+            const btn = card.querySelector('.btn-add-cart');
+            if (btn) {
+                btn.innerHTML = `<i class="fas fa-cart-plus"></i> ${item ? 'Adicionar mais' : 'Adicionar'}`;
+            }
+        });
+    }
 
     // ============================================================
     // CARRINHO
@@ -1036,39 +1034,41 @@ function atualizarEstadoCards() {
     }
 
     function removerDoCarrinho(produtoId) {
-    carrinho = carrinho.filter(item => item.produtoId !== produtoId);
-    renderizarCarrinho();
-    atualizarUI();
-    atualizarEstadoCards();   // 👈 ADICIONE ESTA LINHA
-}
-
+        carrinho = carrinho.filter(item => item.produtoId !== produtoId);
+        renderizarCarrinho();
+        atualizarUI();
+        atualizarEstadoCards();
+    }
 
     function alterarQuantidade(produtoId, novoValor) {
-    const item = carrinho.find(i => i.produtoId === produtoId);
-    if (!item) return;
+        const item = carrinho.find(i => i.produtoId === produtoId);
+        if (!item) return;
 
-    const val = parseFloat(novoValor);
-    if (isNaN(val) || val <= 0) {
-        removerDoCarrinho(produtoId);
-        return;
+        const val = parseFloat(novoValor);
+        if (isNaN(val) || val <= 0) {
+            removerDoCarrinho(produtoId);
+            return;
+        }
+        item.quantidade = Math.round(val * 10) / 10;
+        renderizarCarrinho();
+        atualizarUI();
+        atualizarEstadoCards();
     }
-    item.quantidade = val;
-    renderizarCarrinho();
-    atualizarUI();
-    atualizarEstadoCards();   // 👈 ADICIONE ESTA LINHA
-}
 
     function limparCarrinho(event) {
-    if (event) criarRipple(event);
-    if (carrinho.length === 0) return;
-    if (!confirm('Limpar todo o carrinho?')) return;
-    carrinho = [];
-    renderizarCarrinho();
-    atualizarUI();
-    atualizarEstadoCards();
-    fecharCarrinho();   // 👈 ADICIONE ESTA LINHA
-    mostrarBanner('🗑️ Carrinho limpo!', true);
-}
+        if (event) criarRipple(event);
+        if (carrinho.length === 0) {
+            fecharCarrinho();
+            return;
+        }
+        if (!confirm('Limpar todo o carrinho?')) return;
+        carrinho = [];
+        renderizarCarrinho();
+        atualizarUI();
+        atualizarEstadoCards();
+        fecharCarrinho();
+        mostrarBanner('🗑️ Carrinho limpo!', true);
+    }
 
     function renderizarCarrinho() {
         const cartBody = document.getElementById('cartBody');
@@ -1082,14 +1082,14 @@ function atualizarEstadoCards() {
         const totalValor = getTotalCarrinho();
 
         if (cartCount) {
-            cartCount.textContent = totalItens;
+            cartCount.textContent = totalItens.toFixed(1);
             if (totalItens > 0) cartCount.classList.add('bump');
             setTimeout(() => cartCount.classList.remove('bump'), 300);
         }
-        if (cartCount2) cartCount2.textContent = totalItens;
+        if (cartCount2) cartCount2.textContent = totalItens.toFixed(1);
         
         document.querySelectorAll('.cart-count-badge').forEach(el => {
-            el.textContent = totalItens;
+            el.textContent = totalItens.toFixed(1);
             if (totalItens > 0) el.classList.add('bump');
             setTimeout(() => el.classList.remove('bump'), 300);
         });
@@ -1122,7 +1122,7 @@ function atualizarEstadoCards() {
                     <div class="cart-item-actions">
                         <label style="font-size:11px;color:var(--slate-500);margin-right:4px;">Qtd:</label>
                         <input type="number" class="qty-input" value="${(item.quantidade || 0).toFixed(1)}" 
-                               step="0.5" min="0.5" 
+                               step="0.1" min="0.1" 
                                onchange="alterarQuantidade('${item.produtoId}', this.value)"
                                onfocus="this.select()" />
                         <button class="cart-item-remove" onclick="removerDoCarrinho('${item.produtoId}')"><i class="fas fa-trash-alt"></i></button>
@@ -1133,13 +1133,13 @@ function atualizarEstadoCards() {
         `).join('');
 
         document.getElementById('cartTotal').textContent = `R$ ${totalValor.toFixed(2)}`;
-        document.getElementById('cartTotalItens').textContent = totalItens;
+        document.getElementById('cartTotalItens').textContent = totalItens.toFixed(1);
     }
 
     function atualizarUI() {
         renderizarCarrinho();
         const totalItens = carrinho.reduce((sum, item) => sum + (item.quantidade || 0), 0);
-        document.querySelectorAll('.cart-count').forEach(el => el.textContent = totalItens);
+        document.querySelectorAll('.cart-count').forEach(el => el.textContent = totalItens.toFixed(1));
     }
 
     // ============================================================
@@ -1365,7 +1365,7 @@ function atualizarEstadoCards() {
                 <span class="item-name">${item.nome}</span>
                 <div class="item-qty">
                     <span style="font-size:12px;color:var(--slate-500);">R$ ${item.preco.toFixed(2)}</span>
-                    <input type="number" step="0.5" min="0.5" value="${(item.quantidade || 0).toFixed(1)}" 
+                    <input type="number" step="0.1" min="0.1" value="${(item.quantidade || 0).toFixed(1)}" 
                            data-index="${index}" onchange="atualizarItemPedido(${index}, this.value)" />
                     <button class="btn-danger btn-sm" onclick="removerItemPedido(${index})" style="padding:2px 8px;font-size:10px;">✕</button>
                 </div>
@@ -1397,7 +1397,7 @@ function atualizarEstadoCards() {
     function atualizarItemPedido(index, value) {
         const val = parseFloat(value);
         if (!isNaN(val) && val > 0) {
-            pedidoEditando.itens[index].quantidade = val;
+            pedidoEditando.itens[index].quantidade = Math.round(val * 10) / 10;
             atualizarTotalModal();
         }
     }
@@ -1558,12 +1558,10 @@ function atualizarEstadoCards() {
             navigator.serviceWorker.register('sw.js')
                 .then(reg => {
                     console.log('✅ SW registrado!');
-                    // Força atualização
                     reg.update();
                 })
                 .catch(err => console.warn('⚠️ Erro SW:', err));
 
-            // Limpa caches antigos para evitar HTML desatualizado
             if (window.caches) {
                 caches.keys().then(names => {
                     for (let name of names) {
