@@ -204,6 +204,60 @@
         .cart-footer .btn-finalizar:active::after { opacity: 1; }
         .cart-footer .btn-finalizar:active { animation: pulse 0.3s ease; transform: scale(0.97); }
         .cart-footer .btn-finalizar:hover { background: var(--verde-escuro); }
+
+        /* ===== ANIMAÇÃO DO BOTÃO GERAR PDF ===== */
+        @keyframes pdfPulse {
+            0%, 100% {
+                box-shadow: 0 4px 12px rgba(11,110,58,0.35), 0 0 0 0 rgba(11,110,58,0.5);
+            }
+            50% {
+                box-shadow: 0 4px 16px rgba(11,110,58,0.55), 0 0 0 8px rgba(11,110,58,0);
+            }
+        }
+
+        @keyframes pdfShine {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .cart-footer .btn-finalizar {
+            position: relative;
+            overflow: hidden;
+            animation: pdfPulse 2s ease-in-out infinite;
+        }
+
+        /* Brilho passando pelo botão */
+        .cart-footer .btn-finalizar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent 0%,
+                rgba(255,255,255,0.55) 50%,
+                transparent 100%
+            );
+            transform: skewX(-20deg);
+            animation: pdfShine 3s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .cart-footer .btn-finalizar i,
+        .cart-footer .btn-finalizar span {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Ao passar o mouse, para a pulsação */
+        .cart-footer .btn-finalizar:hover {
+            animation: none;
+            box-shadow: 0 6px 20px rgba(11,110,58,0.5);
+        }
         
         .cart-footer .btn-whatsapp { width: 100%; padding: 12px; background: #25D366; color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .cart-footer .btn-whatsapp:active { animation: pulse 0.3s ease; transform: scale(0.97); background: #1da851; }
@@ -583,7 +637,7 @@
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;">
                 <button class="btn-finalizar btn-ripple" onclick="finalizarPedido(event)">
-                    <i class="fas fa-file-pdf"></i> Gerar PDF
+                    <i class="fas fa-file-pdf"></i> <span>Gerar PDF</span>
                 </button>
                 <button class="btn-whatsapp btn-ripple" onclick="enviarWhatsApp(event)">
                     <i class="fab fa-whatsapp"></i> Enviar WhatsApp
@@ -726,9 +780,76 @@
     let produtos = [];
     let pedidos = [];
     let carrinho = [];
-    let quantidadesSelecionadas = {};   // Guarda a quantidade escolhida por produto antes de adicionar
+    let quantidadesSelecionadas = {};
     let graficoPizzaInstance = null;
     let graficoBarrasInstance = null;
+
+    // ============================================================
+    // PERSISTÊNCIA NO LOCALSTORAGE
+    // ============================================================
+    function salvarCarrinhoLocal() {
+        try {
+            localStorage.setItem('ivo_carrinho', JSON.stringify(carrinho));
+            localStorage.setItem('ivo_quantidades', JSON.stringify(quantidadesSelecionadas));
+        } catch (e) {
+            console.warn('⚠️ Erro ao salvar carrinho:', e);
+        }
+    }
+
+    function carregarCarrinhoLocal() {
+        try {
+            const carrinhoSalvo = localStorage.getItem('ivo_carrinho');
+            const quantidadesSalvas = localStorage.getItem('ivo_quantidades');
+            
+            if (carrinhoSalvo) {
+                const parsed = JSON.parse(carrinhoSalvo);
+                if (Array.isArray(parsed)) {
+                    carrinho = parsed;
+                    console.log('✅ Carrinho restaurado:', carrinho.length, 'itens');
+                }
+            }
+            
+            if (quantidadesSalvas) {
+                const parsedQtd = JSON.parse(quantidadesSalvas);
+                if (parsedQtd && typeof parsedQtd === 'object') {
+                    quantidadesSelecionadas = parsedQtd;
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ Erro ao carregar carrinho:', e);
+            carrinho = [];
+            quantidadesSelecionadas = {};
+        }
+    }
+
+    // ============================================================
+    // SINCRONIZAÇÃO DO CARRINHO COM OS PRODUTOS CARREGADOS
+    // ============================================================
+    function sincronizarCarrinhoComProdutos() {
+        if (!produtos.length || !carrinho.length) return;
+
+        carrinho = carrinho.map(item => {
+            let produto = produtos.find(p => p.id === item.produtoId);
+
+            if (!produto && item.nome) {
+                produto = produtos.find(p => 
+                    p.nome.trim().toLowerCase() === item.nome.trim().toLowerCase()
+                );
+            }
+
+            if (produto) {
+                return {
+                    ...item,
+                    produtoId: produto.id,
+                    preco: produto.preco || item.preco,
+                    tipo: produto.tipo || item.tipo
+                };
+            }
+            return item;
+        }).filter(item => produtos.some(p => p.id === item.produtoId));
+
+        salvarCarrinhoLocal();
+    }
 
     // ============================================================
     // FUNÇÕES DE UI
@@ -756,13 +877,16 @@
             const data = await chamarAPI('getProducts');
 
             if (data && data.status === 'success' && Array.isArray(data.products)) {
-                produtos = data.products.map(p => ({
-                    id: 'prod_' + Math.random().toString(36).substr(2, 9),
-                    nome: p.descricao || 'Sem nome',
-                    preco: parseFloat(p.preco) || 0,
-                    tipo: p.tipo || '',
-                    imagem: getImagemProduto(p.descricao || '')
-                })).filter(p => p.nome && p.nome.trim() !== '');
+                produtos = data.products.map(p => {
+                    const nome = (p.descricao || 'Sem nome').trim();
+                    return {
+                        id: 'prod_' + nome.replace(/\s+/g, '_').toLowerCase(),
+                        nome: nome,
+                        preco: parseFloat(p.preco) || 0,
+                        tipo: p.tipo || '',
+                        imagem: getImagemProduto(nome)
+                    };
+                }).filter(p => p.nome && p.nome.trim() !== '');
             } else {
                 throw new Error('Dados inválidos');
             }
@@ -777,6 +901,8 @@
                 pedidos = [];
             }
 
+            sincronizarCarrinhoComProdutos();
+
             mostrarBanner('✅ Dados carregados!', true);
             document.getElementById('syncStatus').innerHTML = '<span class="dot online"></span> Online';
             atualizarTodasTelas();
@@ -784,14 +910,15 @@
         } catch (error) {
             console.error('❌ Erro ao carregar:', error);
             produtos = [
-                { id: '1', nome: 'ABRILHANTADOR FOLHEAÇÃO EVO GL', preco: 1416.00, tipo: 'LITRO', imagem: IMAGEM_PADRAO },
-                { id: '2', nome: 'ABRILHANTADOR PARTE A', preco: 159.50, tipo: 'LITRO', imagem: IMAGEM_PADRAO },
-                { id: '3', nome: 'ABRILHANTADOR PARTE B', preco: 159.50, tipo: 'LITRO', imagem: IMAGEM_PADRAO },
-                { id: '4', nome: 'ACIDO CLORIDRICO QP C 33%', preco: 14.49, tipo: 'KG', imagem: IMAGEM_PADRAO },
-                { id: '5', nome: 'ACIDO NITRICO QP BB', preco: 10.95, tipo: 'KG', imagem: IMAGEM_PADRAO },
-                { id: '6', nome: 'ACIDO SULFURICO BB IND. C 98,6', preco: 7.49, tipo: 'KG', imagem: IMAGEM_PADRAO },
+                { id: 'prod_abrilhantador_folheacao_evo_gl', nome: 'ABRILHANTADOR FOLHEAÇÃO EVO GL', preco: 1416.00, tipo: 'LITRO', imagem: IMAGEM_PADRAO },
+                { id: 'prod_abrilhantador_parte_a', nome: 'ABRILHANTADOR PARTE A', preco: 159.50, tipo: 'LITRO', imagem: IMAGEM_PADRAO },
+                { id: 'prod_abrilhantador_parte_b', nome: 'ABRILHANTADOR PARTE B', preco: 159.50, tipo: 'LITRO', imagem: IMAGEM_PADRAO },
+                { id: 'prod_acido_cloridrico_qp_c_33', nome: 'ACIDO CLORIDRICO QP C 33%', preco: 14.49, tipo: 'KG', imagem: IMAGEM_PADRAO },
+                { id: 'prod_acido_nitrico_qp_bb', nome: 'ACIDO NITRICO QP BB', preco: 10.95, tipo: 'KG', imagem: IMAGEM_PADRAO },
+                { id: 'prod_acido_sulfurico_bb_ind_c_98_6', nome: 'ACIDO SULFURICO BB IND. C 98,6', preco: 7.49, tipo: 'KG', imagem: IMAGEM_PADRAO },
             ];
             pedidos = [];
+            sincronizarCarrinhoComProdutos();
             mostrarBanner('⚠️ Dados de exemplo', false);
             document.getElementById('syncStatus').innerHTML = '<span class="dot offline"></span> Offline';
             atualizarTodasTelas();
@@ -803,6 +930,7 @@
         renderizarDashboard();
         renderizarCarrinho();
         atualizarUI();
+        atualizarEstadoCards();
     }
 
     // ============================================================
@@ -916,10 +1044,11 @@
 
     function alterarQtdProduto(produtoId, delta) {
         let qtd = getQtdSelecionada(produtoId) + (delta * 0.1);
-        qtd = Math.round(qtd * 10) / 10;   // evita bugs de ponto flutuante
+        qtd = Math.round(qtd * 10) / 10;
         if (qtd < 0.1) qtd = 0.1;
         quantidadesSelecionadas[produtoId] = qtd;
         atualizarQtdNaTela(produtoId, qtd);
+        salvarCarrinhoLocal();
     }
 
     function definirQtdProduto(produtoId, valor) {
@@ -928,6 +1057,7 @@
         qtd = Math.round(qtd * 10) / 10;
         quantidadesSelecionadas[produtoId] = qtd;
         atualizarQtdNaTela(produtoId, qtd);
+        salvarCarrinhoLocal();
     }
 
     function atualizarQtdNaTela(produtoId, qtd) {
@@ -961,18 +1091,17 @@
             });
         }
 
-        // Reseta a quantidade selecionada para 1 após adicionar
         quantidadesSelecionadas[produtoId] = 1;
         atualizarQtdNaTela(produtoId, 1);
 
         renderizarCarrinho();
         atualizarUI();
         atualizarEstadoCards();
+        salvarCarrinhoLocal();
         if (navigator.vibrate) navigator.vibrate(10);
         mostrarBanner(`✅ ${produto.nome} (${qtd.toFixed(1)}) adicionado!`, true);
     }
 
-    // Atualiza o estado visual dos cards (verde + badge) sem redesenhar tudo
     function atualizarEstadoCards() {
         produtos.forEach(produto => {
             const card = document.querySelector(`.product-card[data-id="${produto.id}"]`);
@@ -1038,6 +1167,7 @@
         renderizarCarrinho();
         atualizarUI();
         atualizarEstadoCards();
+        salvarCarrinhoLocal();
     }
 
     function alterarQuantidade(produtoId, novoValor) {
@@ -1053,6 +1183,7 @@
         renderizarCarrinho();
         atualizarUI();
         atualizarEstadoCards();
+        salvarCarrinhoLocal();
     }
 
     function limparCarrinho(event) {
@@ -1066,6 +1197,7 @@
         renderizarCarrinho();
         atualizarUI();
         atualizarEstadoCards();
+        salvarCarrinhoLocal();
         fecharCarrinho();
         mostrarBanner('🗑️ Carrinho limpo!', true);
     }
@@ -1546,6 +1678,7 @@
             }
         });
 
+        carregarCarrinhoLocal();
         carregarDados();
     }
 
